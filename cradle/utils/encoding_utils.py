@@ -56,6 +56,7 @@ def encode_data_to_base64_path(data: Any) -> List[str]:
         data = [data]
 
     for item in data:
+        buffered = None
         if isinstance(item, str):
             if os.path.exists(assemble_project_path(item)):
                 path = assemble_project_path(item)
@@ -69,23 +70,32 @@ def encode_data_to_base64_path(data: Any) -> List[str]:
             continue
 
         elif isinstance(item, bytes):  # mss grab bytes
-            image = Image.frombytes('RGB', item.size, item.bgra, 'raw', 'BGRX')
-            buffered = io.BytesIO()
-            image.save(buffered, format="JPEG")
+            try:
+                image = Image.frombytes('RGB', item.size, item.bgra, 'raw', 'BGRX')
+                buffered = io.BytesIO()
+                image.save(buffered, format="JPEG")
+            except AttributeError:
+                logger.error("Invalid bytes object for image encoding. Skipping.")
+                continue
         elif isinstance(item, Image.Image):  # PIL image
             buffered = io.BytesIO()
             item.save(buffered, format="JPEG")
         elif isinstance(item, np.ndarray):  # cv2 image array
-            item = cv2.cvtColor(item, cv2.COLOR_BGR2RGB)  # convert to RGB
-            image = Image.fromarray(item)
-            buffered = io.BytesIO()
-            image.save(buffered, format="JPEG")
+            try:
+                item = cv2.cvtColor(item, cv2.COLOR_BGR2RGB)  # convert to RGB
+                image = Image.fromarray(item)
+                buffered = io.BytesIO()
+                image.save(buffered, format="JPEG")
+            except Exception as e:
+                logger.error(f"Error processing ndarray: {e}. Skipping.")
+                continue
         elif item is None:
             logger.error("Tring to encode None image! Skipping it.")
             continue
 
-        encoded_image = encode_image_binary(buffered.getvalue())
-        encoded_image = f"data:image/jpeg;base64,{encoded_image}"
-        encoded_images.append(encoded_image)
+        if buffered:
+            encoded_image = encode_image_binary(buffered.getvalue())
+            encoded_image = f"data:image/jpeg;base64,{encoded_image}"
+            encoded_images.append(encoded_image)
 
     return encoded_images
