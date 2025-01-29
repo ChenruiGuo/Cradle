@@ -28,3 +28,4 @@ dataclass_wizard==0.22.3
 dill==0.3.8
 anthropic
 groundingdino-py
+httpx==0.27.2
