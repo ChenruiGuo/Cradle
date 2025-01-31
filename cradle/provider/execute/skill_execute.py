@@ -69,7 +69,7 @@ class SkillExecuteProvider(BaseProvider):
         res_params = {
             "start_frame_id": start_frame_id,
             "end_frame_id": end_frame_id,
-            "screenshot_path": screenshot_path,
+            constants.IMAGES_MEM_BUCKET: screenshot_path,
             "pre_action": pre_action,
             "pre_screen_classification": pre_screen_classification,
             "exec_info": exec_info,
