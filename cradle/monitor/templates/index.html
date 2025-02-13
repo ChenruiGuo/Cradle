@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Log Monitor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      #logs {
+        white-space: pre-wrap;
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Log Monitor</h1>
+    <div id="logs"></div>
+
+    <script>
+      const socket = io();
+
+      // Display existing logs
+      const logsElement = document.getElementById("logs");
+
+      // Clear existing logs when the page loads
+      logsElement.textContent = "";
+
+      // Listen for new log updates
+      socket.on("log_update", function (log) {
+        logsElement.textContent += "\n" + log;
+      });
+    </script>
+  </body>
+</html>

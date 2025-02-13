@@ -5,7 +5,7 @@ openai==1.2.3
 python-dotenv==1.0.0
 numpy==1.24.3
 tiktoken==0.5.1
-colorama
+colorama==0.4.6
 pyautogui==0.9.54
 pydirectinput==1.0.4; sys_platform == "win32"
 opencv-python==4.8.1.78
@@ -14,18 +14,21 @@ pillow>=10.3.0
 Multi-Template-Matching==1.6.6
 imageio[ffmpeg]
 mss==9.0.1
-aiohttp
+aiohttp==3.11.11
 easyocr==1.7.1
 spacy==3.7.2
 chardet==5.2.0
 matplotlib==3.9.1
-supervision==0.21.0
+supervision==0.6.0
 pyobjc-framework-Quartz==10.0; sys_platform == "darwin"
 pyobjc-framework-Cocoa==10.0; sys_platform == "darwin"
 git+https://github.com/facebookresearch/segment-anything.git
 pywin32; sys_platform == "win32"
 dataclass_wizard==0.22.3
 dill==0.3.8
-anthropic
-groundingdino-py
+anthropic==0.45.0
+groundingdino-py==0.4.0
 httpx==0.27.2
+flask==3.1.0
+flask-socketio==5.5.1
+python-socketio[client]
