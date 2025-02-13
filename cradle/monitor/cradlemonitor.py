@@ -1,4 +1,3 @@
-# cradlemonitor.py
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 import threading
@@ -14,16 +13,16 @@ logs = []
 def index():
     return render_template('index.html', logs=logs)
 
-@socketio.on('connect')
-def handle_connect():
+#@socketio.on('connect')
+#def handle_connect():
     # Send all existing logs to the new client
-    for log in logs:
-        socketio.emit('log_update', log)
+#    for log in logs:
+#        socketio.emit('log_update', log)
 
-def send_log(message):
-    """Function to send logs to the web UI."""
-    logs.append(message)
-    socketio.emit('log_update', message)
+def add_log(log_data):
+    """Add a log to the logs array and send it to all connected clients."""
+    logs.append(log_data)
+    socketio.emit('log_update', log_data)  # Broadcast to all clients
 
 def start_web_ui():
     """Function to start the Flask + Socket.IO server."""

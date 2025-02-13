@@ -3,10 +3,12 @@ import os
 import psutil
 from pathlib import Path
 import sys
+import threading
 
 from colorama import Fore, Back, Style, init as colours_on
 
 from cradle.utils import Singleton
+from cradle.monitor import add_log
 
 colours_on(autoreset=True)
 
@@ -43,13 +45,6 @@ class CPUMemColorFormatter(logging.Formatter):
 
         record.cpu_usage = psutil.cpu_percent(interval=None)
         record.memory_usage = psutil.virtual_memory().percent
-
-        cpu_usage = psutil.cpu_percent(interval=None)
-        memory = psutil.virtual_memory()
-        memory_usage = memory.percent
-
-        record.cpu_usage = cpu_usage
-        record.memory_usage = memory_usage
 
         return super().format(record)
 
@@ -123,6 +118,25 @@ class Logger(metaclass=Singleton):
                 message = " ".join(message)
 
         self.logger.log(level, message, extra={"title": title, "color": title_color})
+
+        # Send log to web UI
+        log_data = {
+            "timestamp": logging.Formatter().formatTime(self.logger.makeRecord(
+                name=self.logger.name,
+                level=level,
+                fn="",
+                lno=0,
+                msg=message,
+                args=None,
+                exc_info=None
+            )),
+            "cpu_usage": psutil.cpu_percent(interval=None),
+            "memory_usage": psutil.virtual_memory().percent,
+            "logger_name": self.logger.name,
+            "level": logging.getLevelName(level),
+            "message": message
+        }
+        add_log(log_data)
 
     def critical(
             self,
