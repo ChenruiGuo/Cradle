@@ -8,10 +8,11 @@ socketio = SocketIO(app)
 
 # Store logs in memory
 logs = []
+cradle_status = "Ready"
 
 @app.route('/')
 def index():
-    return render_template('index.html', logs=logs)
+    return render_template('index.html', logs=logs, status=cradle_status)
 
 #@socketio.on('connect')
 #def handle_connect():
@@ -22,7 +23,25 @@ def index():
 def add_log(log_data):
     """Add a log to the logs array and send it to all connected clients."""
     logs.append(log_data)
-    socketio.emit('log_update', log_data)  # Broadcast to all clients
+    socketio.emit('log_update', log_data)
+
+@socketio.on("control")
+def handle_control(action):
+    """Handle Play, Pause, and Stop actions from the frontend."""
+    global cradle_status
+    if action == "play":
+        cradle_status = "Running"
+    elif action == "pause":
+        cradle_status = "Paused"
+    elif action == "stop":
+        cradle_status = "Stopped"
+
+    # Broadcast the updated status to all clients
+    socketio.emit("status_update", cradle_status)
+
+def get_status():
+    global cradle_status
+    return cradle_status
 
 def start_web_ui():
     """Function to start the Flask + Socket.IO server."""
