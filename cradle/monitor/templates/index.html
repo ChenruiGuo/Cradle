@@ -221,12 +221,9 @@
         document.querySelectorAll(".nav-link").forEach(tab => tab.classList.remove("active"));
         clickedTab.classList.add("active");
       }
-
-
       const socket = io();
 
-      // Javascript for Status
-      // Button event listeners
+      // Javascript for Buttons
       document.getElementById("play-button").addEventListener("click", () => {
       socket.emit("control", "play");
       });
@@ -239,12 +236,24 @@
       socket.emit("control", "stop");
       });
 
-      // Listen for status updates from the server
+      // Javascript for Cradle Status
       socket.on("status_update", function (status) {
       document.getElementById("current-status").textContent = status;
       });
 
-      // Javascript for Live Logs
+      // Listen for stage updates
+      socket.on("stage_update", function (stageIndex) {
+        // Reset all stage boxes
+        document.querySelectorAll(".pill").forEach((pill, index) => {
+          if (index === stageIndex) {
+        pill.classList.add("active");  // Activate the current stage
+      } else {
+        pill.classList.remove("active");  // Remove active state from others
+      }
+      });
+      });
+
+      // Javascript for Chat Logs
       // Listen for incoming chat messages
       socket.on("chat_message", function (data) {
       const chatBox = document.getElementById("chat-box");
@@ -320,32 +329,6 @@
       // Listen for new log updates
       socket.on("log_update", function (log) {
         logsElement.innerHTML += formatLog(log) + "<br>";
-      });
-
-      // Listen for stage updates
-      socket.on("stage_update", function (stage) {
-        // Reset all stage boxes
-        document.querySelectorAll(".stage-box").forEach(box => {
-          box.classList.remove("active");
-        });
-
-        // Activate the current stage box
-        if (stage) {
-          document.getElementById(stage).classList.add("active");
-        }
-      });
-
-      // Button event listeners
-      document.getElementById("play-button").addEventListener("click", () => {
-        socket.emit("control", "play");
-      });
-
-      document.getElementById("pause-button").addEventListener("click", () => {
-        socket.emit("control", "pause");
-      });
-
-      document.getElementById("stop-button").addEventListener("click", () => {
-        socket.emit("control", "stop");
       });
     </script>
   </body>

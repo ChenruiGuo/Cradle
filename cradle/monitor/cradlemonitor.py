@@ -20,11 +20,13 @@ def index():
 #    for log in logs:
 #        socketio.emit('log_update', log)
 
+# Memory Logs
 def add_log(log_data):
     """Add a log to the logs array and send it to all connected clients."""
     logs.append(log_data)
     socketio.emit('log_update', log_data)
 
+# Control Buttons
 @socketio.on("control")
 def handle_control(action):
     """Handle Play, Pause, and Stop actions from the frontend."""
@@ -39,9 +41,16 @@ def handle_control(action):
     # Broadcast the updated status to all clients
     socketio.emit("status_update", cradle_status)
 
+# Cradle Status
 def get_status():
     global cradle_status
     return cradle_status
+
+# Cradle Stage Pills
+#@socketio.on("stage_update")
+def send_stage_update(stage_index):
+    """Emit the current stage index to all connected clients."""
+    socketio.emit("stage_update", stage_index)
 
 def start_web_ui():
     """Function to start the Flask + Socket.IO server."""
