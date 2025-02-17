@@ -1,6 +1,8 @@
 import os
 import atexit
 from typing import Dict, Any
+import threading
+import time
 
 from cradle.utils.dict_utils import kget
 from cradle.utils.string_utils import replace_unsupported_chars
@@ -32,10 +34,12 @@ from cradle.provider import SkillExecuteProvider
 from cradle.provider import AugmentProvider
 from cradle.planner.stardew_planner import StardewPlanner
 from log_processor import process_log_messages
+from cradle.monitor import start_web_ui, get_status, send_stage_update
 
 config = Config()
 logger = Logger()
 io_env = IOEnvironment()
+STAGES = ["1 Information Gathering", "2 Self Reflection", "3 Task Inference", "4 Skill Curation", "5 Action Planning"]
 
 
 class PipelineRunner():
@@ -166,6 +170,11 @@ class PipelineRunner():
 
     def run(self):
 
+        # 0. Wait for user to set up Cradle monitor
+        print("Press the play button to start Cradle!")
+        while get_status()=="Ready":
+            time.sleep(2)
+
         # 1. Initiate the parameters
         success = False
         init_params = {
@@ -205,20 +214,38 @@ class PipelineRunner():
 
         while not success:
             try:
+                if not self.check_status():
+                    break
+                
                 # 7.1. Information gathering
                 self.run_information_gathering()
+
+                if not self.check_status():
+                    break
 
                 # 7.2. Self reflection
                 self.run_self_reflection()
 
+                if not self.check_status():
+                    break
+
                 # 7.3. Task inference
                 self.run_task_inference()
+
+                if not self.check_status():
+                    break
 
                 # 7.4. Skill curation
                 self.run_skill_curation()
 
+                if not self.check_status():
+                    break
+
                 # 7.5. Action planning
                 self.run_action_planning()
+
+                if not self.check_status():
+                    break
 
                 step += 1
 
@@ -230,6 +257,9 @@ class PipelineRunner():
                     logger.write('Max steps reached, exiting.')
                     break
 
+                if not self.check_status():
+                    break
+
             except KeyboardInterrupt:
                 logger.write('KeyboardInterrupt Ctrl+C detected, exiting.')
                 self.pipeline_shutdown()
@@ -239,6 +269,8 @@ class PipelineRunner():
 
 
     def run_information_gathering(self):
+
+        send_stage_update(0)
 
         # 1. Prepare the parameters to call llm api
         self.information_gathering_preprocess()
@@ -252,6 +284,8 @@ class PipelineRunner():
 
     def run_self_reflection(self):
 
+        send_stage_update(1)
+
         # 1. Prepare the parameters to call llm api
         self.self_reflection_preprocess()
 
@@ -264,6 +298,8 @@ class PipelineRunner():
 
     def run_task_inference(self):
 
+        send_stage_update(2)
+
         # 1. Prepare the parameters to call llm api
         self.task_inference_preprocess()
 
@@ -275,6 +311,8 @@ class PipelineRunner():
 
 
     def run_action_planning(self):
+
+        send_stage_update(4)
 
         # 1. Prepare the parameters to call llm api
         self.action_planning_preprocess()
@@ -294,8 +332,22 @@ class PipelineRunner():
 
     def run_skill_curation(self):
 
+        send_stage_update(3)
+
         # 1. Call skill curation
         self.skill_curation()
+    
+
+    def check_status():
+        """Check the current status and handle pause/stop behavior."""
+        if get_status()=="Stopped":
+            print("Stopping program...")
+            return False
+        elif get_status()=="Paused":
+            print("Program paused... Waiting to resume.")
+            while get_status()=="Paused":  # If paused, keep checking status every 2s
+                time.sleep(2)
+        return get_status()=="Running"
 
 
 def exit_cleanup(runner):
@@ -324,5 +376,9 @@ def entry(args):
                                     use_task_inference = True)
 
     atexit.register(exit_cleanup, pipelineRunner)
+
+    # Start Cradle monitor in a separate thread
+    web_ui_thread = threading.Thread(target=start_web_ui, daemon=True)
+    web_ui_thread.start()
 
     pipelineRunner.run()

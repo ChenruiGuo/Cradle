@@ -1,7 +1,7 @@
 import time
 import threading
 from cradle.log import Logger
-from cradle.monitor import start_web_ui, get_status, send_stage_update
+from cradle.monitor import start_web_ui, get_status, send_stage_update, send_chat_message
 
 logger = Logger()
 STAGES = ["1 Information Gathering", "2 Self Reflection", "3 Task Inference", "4 Skill Curation", "5 Action Planning"]
@@ -33,6 +33,8 @@ def run_program():
         send_stage_update(1)
         time.sleep(2)
         send_stage_update(2)
+        send_chat_message("Cradle", "Hello! I'm Cradle. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
+        send_chat_message("GPT-4o", "Hi Cradle! How can I help? Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
 
         if not check_status():
             break

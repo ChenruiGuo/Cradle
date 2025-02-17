@@ -14,11 +14,12 @@ cradle_status = "Ready"
 def index():
     return render_template('index.html', logs=logs, status=cradle_status)
 
-#@socketio.on('connect')
-#def handle_connect():
+# For refreshes to the web ui
+@socketio.on('connect')
+def handle_connect():
     # Send all existing logs to the new client
-#    for log in logs:
-#        socketio.emit('log_update', log)
+    for log in logs:
+        socketio.emit('log_update', log)
 
 # Memory Logs
 def add_log(log_data):
@@ -47,10 +48,15 @@ def get_status():
     return cradle_status
 
 # Cradle Stage Pills
-#@socketio.on("stage_update")
 def send_stage_update(stage_index):
     """Emit the current stage index to all connected clients."""
     socketio.emit("stage_update", stage_index)
+
+# GPT-4O Live Chat Messages
+def send_chat_message(sender, message):
+    """Send a chat message to the web UI."""
+    socketio.emit("chat_message", {"sender": sender, "message": message})
+    print(f"Chat Message Sent - {sender}: {message}")
 
 def start_web_ui():
     """Function to start the Flask + Socket.IO server."""
