@@ -9,6 +9,8 @@ socketio = SocketIO(app)
 # Store logs in memory
 logs = []
 cradle_status = "Ready"
+STAGES = ["1 Information Gathering", "2 Self Reflection", "3 Task Inference", "4 Skill Curation", "5 Action Planning"]
+
 
 @app.route('/')
 def index():
@@ -48,15 +50,15 @@ def get_status():
     return cradle_status
 
 # Cradle Stage Pills
-def send_stage_update(stage_index):
+def send_stage_update(iter,stage_index):
     """Emit the current stage index to all connected clients."""
+    send_chat_message("Cradle", f"=== Iteration {iter}: {STAGES[stage_index]} ===")
     socketio.emit("stage_update", stage_index)
 
 # GPT-4O Live Chat Messages
 def send_chat_message(sender, message):
     """Send a chat message to the web UI."""
     socketio.emit("chat_message", {"sender": sender, "message": message})
-    print(f"Chat Message Sent - {sender}: {message}")
 
 def start_web_ui():
     """Function to start the Flask + Socket.IO server."""

@@ -39,7 +39,6 @@ from cradle.monitor import start_web_ui, get_status, send_stage_update
 config = Config()
 logger = Logger()
 io_env = IOEnvironment()
-STAGES = ["1 Information Gathering", "2 Self Reflection", "3 Task Inference", "4 Skill Curation", "5 Action Planning"]
 
 
 class PipelineRunner():
@@ -171,7 +170,7 @@ class PipelineRunner():
     def run(self):
 
         # 0. Wait for user to set up Cradle monitor
-        print("Press the play button to start Cradle!")
+        print("==================\n\nCradle Monitor is up! Now simply go to the link on your mobile device, then launch Stardew Valley on your computer, and press Play when you are ready!\n\n==================")
         while get_status()=="Ready":
             time.sleep(2)
 
@@ -218,30 +217,35 @@ class PipelineRunner():
                     break
                 
                 # 7.1. Information gathering
+                send_stage_update(step+1,0)
                 self.run_information_gathering()
 
                 if not self.check_status():
                     break
 
                 # 7.2. Self reflection
+                send_stage_update(step+1,1)
                 self.run_self_reflection()
 
                 if not self.check_status():
                     break
 
                 # 7.3. Task inference
+                send_stage_update(step+1,2)
                 self.run_task_inference()
 
                 if not self.check_status():
                     break
 
                 # 7.4. Skill curation
+                send_stage_update(step+1,3)
                 self.run_skill_curation()
 
                 if not self.check_status():
                     break
 
                 # 7.5. Action planning
+                send_stage_update(step+1,4)
                 self.run_action_planning()
 
                 if not self.check_status():
@@ -270,8 +274,6 @@ class PipelineRunner():
 
     def run_information_gathering(self):
 
-        send_stage_update(0)
-
         # 1. Prepare the parameters to call llm api
         self.information_gathering_preprocess()
 
@@ -283,8 +285,6 @@ class PipelineRunner():
 
 
     def run_self_reflection(self):
-
-        send_stage_update(1)
 
         # 1. Prepare the parameters to call llm api
         self.self_reflection_preprocess()
@@ -298,8 +298,6 @@ class PipelineRunner():
 
     def run_task_inference(self):
 
-        send_stage_update(2)
-
         # 1. Prepare the parameters to call llm api
         self.task_inference_preprocess()
 
@@ -311,8 +309,6 @@ class PipelineRunner():
 
 
     def run_action_planning(self):
-
-        send_stage_update(4)
 
         # 1. Prepare the parameters to call llm api
         self.action_planning_preprocess()
@@ -332,12 +328,11 @@ class PipelineRunner():
 
     def run_skill_curation(self):
 
-        send_stage_update(3)
-
         # 1. Call skill curation
         self.skill_curation()
     
 
+    @staticmethod
     def check_status():
         """Check the current status and handle pause/stop behavior."""
         if get_status()=="Stopped":

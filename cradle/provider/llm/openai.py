@@ -26,6 +26,8 @@ from cradle.log import Logger
 from cradle.utils.json_utils import load_json
 from cradle.utils.encoding_utils import encode_data_to_base64_path
 from cradle.utils.file_utils import assemble_project_path
+from cradle.monitor import send_chat_message
+
 
 config = Config()
 logger = Logger()
@@ -334,6 +336,7 @@ class OpenAIProvider(LLMProvider, EmbeddingProvider):
                 logger.double_check()
 
             message = response.choices[0].message.content
+            send_chat_message(model,message)
 
             info = {
                 "prompt_tokens" : response.usage.prompt_tokens,
@@ -414,6 +417,7 @@ class OpenAIProvider(LLMProvider, EmbeddingProvider):
                 logger.double_check()
 
             message = response.choices[0].message.content
+            send_chat_message(model,message)
 
             info = {
                 "prompt_tokens": response.usage.prompt_tokens,
