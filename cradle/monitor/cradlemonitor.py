@@ -36,10 +36,10 @@ def handle_control(action):
     global cradle_status
     if action == "play":
         cradle_status = "Running"
-    elif action == "pause":
-        cradle_status = "Paused"
+    elif action == "pause" and cradle_status == "Running":
+        cradle_status = "Pausing"
     elif action == "stop":
-        cradle_status = "Stopped"
+        cradle_status = "Stopping"
 
     # Broadcast the updated status to all clients
     socketio.emit("status_update", cradle_status)
@@ -48,6 +48,11 @@ def handle_control(action):
 def get_status():
     global cradle_status
     return cradle_status
+
+def set_status(new_status):
+    global cradle_status
+    cradle_status = new_status
+    socketio.emit("status_update", cradle_status)
 
 # Cradle Stage Pills
 def send_stage_update(iter,stage_index):

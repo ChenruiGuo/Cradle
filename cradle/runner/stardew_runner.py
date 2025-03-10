@@ -34,7 +34,7 @@ from cradle.provider import SkillExecuteProvider
 from cradle.provider import AugmentProvider
 from cradle.planner.stardew_planner import StardewPlanner
 from log_processor import process_log_messages
-from cradle.monitor import start_web_ui, get_status, send_stage_update
+from cradle.monitor import start_web_ui, get_status, send_stage_update, set_status
 
 config = Config()
 logger = Logger()
@@ -268,7 +268,7 @@ class PipelineRunner():
                 logger.write('KeyboardInterrupt Ctrl+C detected, exiting.')
                 self.pipeline_shutdown()
                 break
-
+        set_status("Stopped")
         self.pipeline_shutdown()
 
 
@@ -335,11 +335,13 @@ class PipelineRunner():
     @staticmethod
     def check_status():
         """Check the current status and handle pause/stop behavior."""
-        if get_status()=="Stopped":
-            print("Stopping program...")
+        if get_status()=="Stopping":
+            print("Program stopped...")
             return False
-        elif get_status()=="Paused":
+        elif get_status()=="Pausing":
+            set_status("Paused")
             print("Program paused... Waiting to resume.")
+            time.sleep(2)
             while get_status()=="Paused":  # If paused, keep checking status every 2s
                 time.sleep(2)
         return get_status()=="Running"
