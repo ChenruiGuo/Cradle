@@ -71,6 +71,9 @@ class Logger(metaclass=Singleton):
 
 
     def _configure_root_logger(self):
+        
+        # to declutter the logs by removing prompts sent to openai
+        #logging.getLogger("openai._base_client").setLevel(logging.WARNING)
 
         # format = f'%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         format = '%(asctime)s - CPU: %(cpu_usage)s%%, Memory: %(memory_usage)s%% - %(name)s - %(levelname)s - %(message)s'

@@ -2,31 +2,29 @@ from flask import Flask, render_template
 from flask_socketio import SocketIO
 import threading
 
-# Initialize Flask app and Socket.IO
+# Initialize Flask app and Socket.IO and cradlemonitor
 app = Flask(__name__)
 socketio = SocketIO(app)
-
-# Store logs in memory
-logs = []
+#logs = []
 cradle_status = "Ready"
 STAGES = ["1 Information Gathering", "2 Self Reflection", "3 Task Inference", "4 Skill Curation", "5 Action Planning"]
 
 
 @app.route('/')
 def index():
-    return render_template('index.html', logs=logs, status=cradle_status)
+    return render_template('index.html', status=cradle_status)
 
 # For refreshes to the web ui
-@socketio.on('connect')
-def handle_connect():
-    # Send all existing logs to the new client
-    for log in logs:
-        socketio.emit('log_update', log)
+#@socketio.on('connect')
+#def handle_connect():
+#    # Send all existing logs to the new client
+#    for log in logs:
+#        socketio.emit('log_update', log)
 
-# Memory Logs
+# Logs
 def add_log(log_data):
     """Add a log to the logs array and send it to all connected clients."""
-    logs.append(log_data)
+    #logs.append(log_data)
     socketio.emit('log_update', log_data)
 
 # Control Buttons
@@ -64,6 +62,44 @@ def send_stage_update(iter,stage_index):
 def send_chat_message(sender, message):
     """Send a chat message to the web UI."""
     socketio.emit("chat_message", {"sender": sender, "message": message})
+
+# Generic Cradle Updates
+def send_generic_update(id_,message):
+    """Send generic cradle update to the web UI."""
+    match id_:
+        case 'task_description':
+            socketio.emit("task_update", message)
+        case 'subtask_description':
+            socketio.emit("subtask_update", message)
+        case 'game_status':
+            socketio.emit("game_status_update", message)
+    
+# Skill Library Updates
+def send_skill_library(skills):
+    """Process and send skill library array to the web UI"""  
+    processed_skills = [
+        {"name": skill["function_expression"], "description": skill["description"]}
+        for skill in skills
+    ]
+    socketio.emit("skill_update", processed_skills)
+
+# Execution Info
+def send_exec_info(exec_info):
+    """Process exec info object and send to the web UI"""
+
+    socketio.emit()
+
+# Toolbar List
+def send_toolbar(toolbar_dict_list, id_):
+    """Process toolbar dict list and selected position and send to the web UI"""
+
+    socketio.emit()
+
+# Image
+def send_image(image):
+    """Process augmented screenshot image and send to the web UI"""
+
+    socketio.emit("screenshot_update",)
 
 def start_web_ui():
     """Function to start the Flask + Socket.IO server."""

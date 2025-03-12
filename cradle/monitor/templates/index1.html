@@ -68,49 +68,134 @@
         color: white;
         box-shadow: 0 0 10px rgba(0, 255, 123, 0.5);
       }
-      /* Live Logs */
+      /* Live Chat */
       .chat-box {
-        height: 400px; /* Matches the fixed height of right sections */
-        overflow-y: auto; /* Scrolls when full */
+        height: 400px;
+        overflow-y: auto;
         border: 1px solid #ccc;
         background-color: #f8f9fa;
         padding: 10px;
       }
       .chat-message {
-        padding: 8px;
-        border-radius: 8px;
-        margin-bottom: 5px;
-        max-width: 80%;
+        display: flex;
+        margin-bottom: 8px;
+        line-height: 1.2;
+        font-size: 14px;
       }
       .cradle-message {
-        background-color: #007bff;
+        justify-content: flex-end;
+      }
+      .cradle-message span {
+        background-color: #459fff;
         color: white;
-        align-self: flex-start;
+        padding: 6px 10px;
+        border-radius: 8px;
+        max-width: 70%;
+        display: inline-block;
+        margin: 2px 0;
       }
       .gpt-message {
-        background-color: #28a745;
-        color: white;
-        align-self: flex-end;
+        justify-content: flex-start;
       }
-      /* Fixed Height for Right Side Sections */
+      .gpt-message span {
+        background: none;
+        color: black;
+        font-weight: normal;
+        margin: 2px 0;
+      }
+      /* Game Status Containers */
       .log-section {
-        border: 1px solid #ddd;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #f9f9f9;
         padding: 10px;
-        height: 100px; /* Fixed height for each section */
-        overflow-y: auto; /* Enable scrolling if needed */
+        min-height: 100px;
+        max-height: 140px;
+        overflow-y: auto;
+        margin-bottom: 15px;
+        font-size: 14px;
+      }
+      .log-section p:last-child {
+        margin-bottom: 5px;
+      }
+      /* Task and Subtask Containers */
+      #task-container {
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        line-height: 1.2;
+      }
+      #task-container p:last-child {
+        margin-bottom: 5px;
+      }
+      /* Skill Library Containers */
+      #skill-library,
+      #history-skill-library {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        border-radius: 3px;
+        padding: 5px;
+        align-items: flex-start;
+        justify-content: flex-start;
+      }
+      .history-divider {
+        all: unset;
+        display: block;
+        width: 100%;
+        border-bottom: 1px solid #d1d1d1;
+      }
+      .skill-batch {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+      }
+      /* Skill Pills */
+      .pill2 {
+        padding: 6px;
+        font-size: 12px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: background-color 0.2s ease-in-out;
+        display: inline-flex;
+        text-align: center;
+        height: 30px;
+      }
+      .pill2:hover {
+        background-color: #f0f0f0;
       }
       .screenshot-container img {
         max-width: 100%;
         height: auto;
         border: 1px solid #ccc;
       }
-      /* Log Monitor */
-      #logs {
-        white-space: pre-wrap;
+      /* Page 2 History Containers */
+      #memory-logs .log-section {
+        height: 140px;
+        font-size: 12px;
+        line-height: 1.2;
+        border-radius: 3px;
+        padding: 5px;
+        margin-left: 0;
+      }
+      #memory-logs .log-section p,
+      #memory-logs .log-section hr {
+        margin: 2px;
+      }
+      /* Cradle Logs */
+      .logs-section {
+        border: 1px solid #ddd;
+        margin-bottom: 15px;
         font-family: monospace;
         background-color: #f8f9fa;
-        padding: 10px;
-        border-radius: 5px;
+        padding: 5px;
+        border-radius: 3px;
+        font-size: 10px;
+        line-height: 1.2;
+        height: 500px;
+        overflow-y: auto;
       }
     </style>
   </head>
@@ -165,139 +250,273 @@
     <div id="live-logs" class="page-content">
       <div class="container-fluid">
         <div class="row">
-          <!-- Left Side: Chat Interface -->
+          <!-- Left Section: Task, Subtask, Skills, Execution Info -->
+          <div class="col-md-6 d-flex flex-column p-3">
+            <h5>Task & Subtask</h5>
+            <div id="task-container">
+              <p>
+                <strong
+                  ><span id="task-description"
+                    >Awaiting task description data...</span
+                  ></strong
+                >
+              </p>
+              <p>
+                <em
+                  ><span id="subtask-description"
+                    >Awaiting subtask description data...</span
+                  ></em
+                >
+              </p>
+            </div>
+            <h5>Skill Library</h5>
+            <div id="skill-library" class="log-section"></div>
+            <h5>Execution Info</h5>
+            <div class="log-section">
+              <p id="execution-info">Awaiting data...</p>
+            </div>
+          </div>
+          <!-- Right Section: GPT Reasoning -->
           <div class="col-md-6 p-3">
-            <h2 class="text-center">Live Chat</h2>
+            <h5>GPT-4o Reasoning</h5>
             <div id="chat-box" class="chat-box"></div>
           </div>
-          <!-- Right Side: 4 Stacked Sections -->
-          <div class="col-md-6 d-flex flex-column p-3">
+        </div>
+        <!-- Bottom Section -->
+        <div class="row p-3">
+          <!-- Toolbar & Selected Position -->
+          <div class="col-md-4">
+            <h5>Toolbar List</h5>
             <div class="log-section">
-              <h4>Subtask Description</h4>
-              <p id="subtask-description">Awaiting data...</p>
-            </div>
-            <div class="log-section">
-              <h4>Action</h4>
-              <p id="action">Awaiting data...</p>
-            </div>
-            <div class="log-section">
-              <h4>Toolbar List</h4>
               <ul id="toolbar-list"></ul>
             </div>
-            <div class="log-section">
-              <h4>Skill Library</h4>
-              <ul id="skill-library"></ul>
+          </div>
+          <!-- Game Environment Info -->
+          <div id="game-status" class="text-center"></div>
+          <!-- Screenshot -->
+          <div class="col-md-4 text-center">
+            <div class="screenshot-container">
+              <h5>Screenshot</h5>
+              <img
+                id="screenshot"
+                src=""
+                alt="Screenshot will appear here"
+                class="img-fluid"
+              />
             </div>
           </div>
-        </div>
-        <!-- Screenshot Section -->
-        <div class="screenshot-container text-center p-3">
-          <h4>Screenshot</h4>
-          <img
-            id="screenshot"
-            src=""
-            alt="Screenshot will appear here"
-            class="img-fluid"
-          />
-          <p>
-            <a id="screenshot-link" href="#" target="_blank">View Full Image</a>
-          </p>
         </div>
       </div>
     </div>
-    <div id="memory-logs" class="page-content" style="display: none">
-      <h1>Log Monitor</h1>
-      <div id="logs"></div>
+    <div id="memory-logs" class="page-content">
+      <div class="container-fluid">
+        <div class="row">
+          <!-- Left Section: Historical Data -->
+          <div class="col-md-6 d-flex flex-column p-3">
+            <h5>Task Description History</h5>
+            <div class="log-section">
+              <p id="history-task-description">===</p>
+            </div>
+            <h5>Subtask Description History</h5>
+            <div class="log-section">
+              <p id="history-subtask-description">===</p>
+            </div>
+            <h5>Summarization History</h5>
+            <div class="log-section">
+              <p id="history-summary">Awaiting data...</p>
+            </div>
+            <h5>Execution Info History</h5>
+            <div class="log-section">
+              <p id="history-exec-info">Awaiting data...</p>
+            </div>
+            <h5>Skill Library History</h5>
+            <div id="history-skill-library" class="log-section"></div>
+            <h5>Toolbar List & Selected Position History</h5>
+            <div class="log-section">
+              <ul id="history-toolbar-list"></ul>
+            </div>
+            <h5>Game Status History</h5>
+            <div class="log-section">
+              <p id="history-game-status">Awaiting data...</p>
+            </div>
+          </div>
+          <!-- Right Section: Cradle Logs -->
+          <div class="col-md-6 p-3">
+            <h5>Cradle Logs</h5>
+            <div id="logs" class="logs-section"></div>
+          </div>
+        </div>
+      </div>
     </div>
     <div id="custom-page" class="page-content" style="display: none">
-      <h1>Custom Page</h1>
+      <h5>Custom Page</h5>
       <p>Custom content goes here...</p>
     </div>
     <script>
       // JavaScript for Page Switching
       function showPage(pageId, clickedTab) {
-        document.querySelectorAll(".page-content").forEach(page => page.style.display = "none");
+        document
+          .querySelectorAll(".page-content")
+          .forEach((page) => (page.style.display = "none"));
         document.getElementById(pageId).style.display = "block";
-        document.querySelectorAll(".nav-link").forEach(tab => tab.classList.remove("active"));
+        document
+          .querySelectorAll(".nav-link")
+          .forEach((tab) => tab.classList.remove("active"));
         clickedTab.classList.add("active");
       }
 
-
       const socket = io();
 
-      // Javascript for Status
-      // Button event listeners
+      // Javascript for Buttons
       document.getElementById("play-button").addEventListener("click", () => {
-      socket.emit("control", "play");
+        socket.emit("control", "play");
       });
-
       document.getElementById("pause-button").addEventListener("click", () => {
-      socket.emit("control", "pause");
+        socket.emit("control", "pause");
       });
-
       document.getElementById("stop-button").addEventListener("click", () => {
-      socket.emit("control", "stop");
+        socket.emit("control", "stop");
       });
 
-      // Listen for status updates from the server
+      // Javascript for Cradle Status
       socket.on("status_update", function (status) {
-      document.getElementById("current-status").textContent = status;
+        document.getElementById("current-status").textContent = status;
       });
 
-      // Javascript for Live Logs
-      // Listen for incoming chat messages
+      // Javascript for Stage Pills
+      socket.on("stage_update", function (stageIndex) {
+        document.querySelectorAll(".pill").forEach((pill, index) => {
+          if (index === stageIndex) {
+            pill.classList.add("active"); // Activate the current stage
+          } else {
+            pill.classList.remove("active"); // Remove active state from others
+          }
+        });
+      });
+
+      // Javascript for GPT reasoning
       socket.on("chat_message", function (data) {
-      const chatBox = document.getElementById("chat-box");
-      const messageDiv = document.createElement("div");
-      messageDiv.classList.add("chat-message");
+        const chatBox = document.getElementById("chat-box");
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("chat-message");
+        const messageSpan = document.createElement("span");
+        messageSpan.innerText = data.message;
+        if (data.sender === "Cradle") {
+          messageDiv.classList.add("cradle-message");
+        } else {
+          messageDiv.classList.add("gpt-message");
+        }
+        messageDiv.appendChild(messageSpan);
+        chatBox.appendChild(messageDiv);
+        chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to latest message
+      });
 
-      if (data.sender === "Cradle") {
-      messageDiv.classList.add("cradle-message");
-      } else if (data.sender === "GPT-4o") {
-      messageDiv.classList.add("gpt-message");
-      }
-
-      messageDiv.innerText = `${data.sender}: ${data.message}`;
-      chatBox.appendChild(messageDiv);
-      chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to latest message
+      // Listen for task description updates
+      socket.on("task_update", function (data) {
+        document.getElementById("task-description").textContent = data;
+        let historyTaskContainer = document.getElementById(
+          "history-task-description"
+        );
+        if (historyTaskContainer.textContent.trim() === "===") {
+          historyTaskContainer.innerHTML = `<p>${data}</p>`;
+        } else {
+          let newParagraph = document.createElement("p");
+          let hr = document.createElement("hr");
+          newParagraph.textContent = data;
+          historyTaskContainer.appendChild(hr);
+          historyTaskContainer.appendChild(newParagraph);
+        }
       });
 
       // Listen for subtask description updates
       socket.on("subtask_update", function (data) {
-      document.getElementById("subtask-description").innerText = data;
+        document.getElementById("subtask-description").textContent = data;
+        let historyTaskContainer = document.getElementById(
+          "history-subtask-description"
+        );
+        if (historyTaskContainer.textContent.trim() === "===") {
+          historyTaskContainer.innerHTML = `<p>${data}</p>`;
+        } else {
+          let newParagraph = document.createElement("p");
+          let hr = document.createElement("hr");
+          newParagraph.textContent = data;
+          historyTaskContainer.appendChild(hr);
+          historyTaskContainer.appendChild(newParagraph);
+        }
       });
 
       // Listen for action updates
       socket.on("action_update", function (data) {
-      document.getElementById("action").innerText = data;
+        document.getElementById("action").innerText = data;
       });
 
       // Listen for toolbar list updates
       socket.on("toolbar_update", function (data) {
-      const toolbarList = document.getElementById("toolbar-list");
-      toolbarList.innerHTML = ""; // Clear existing items
-      data.forEach(item => {
-      const li = document.createElement("li");
-      li.innerText = item;
-      toolbarList.appendChild(li);
-      });
+        const toolbarList = document.getElementById("toolbar-list");
+        toolbarList.innerHTML = ""; // Clear existing items
+        data.forEach((item) => {
+          const li = document.createElement("li");
+          li.innerText = item;
+          toolbarList.appendChild(li);
+        });
       });
 
       // Listen for skill library updates
       socket.on("skill_update", function (data) {
-      const skillLibrary = document.getElementById("skill-library");
-      skillLibrary.innerHTML = ""; // Clear existing items
-      data.forEach(item => {
-      const li = document.createElement("li");
-      li.innerText = item;
-      skillLibrary.appendChild(li);
+        $('[data-bs-toggle="popover"]').popover("hide"); // Close all existing popovers before updating
+        const skillLibrary = document.getElementById("skill-library");
+        const skillLibraryHist = document.getElementById(
+          "history-skill-library"
+        );
+        skillLibrary.innerHTML = "";
+        let skillBatchContainer = document.createElement("div");
+        skillBatchContainer.classList.add("skill-batch");
+        if (skillLibraryHist.children.length > 0) {
+          let hr = document.createElement("hr");
+          hr.classList.add("history-divider");
+          skillLibraryHist.appendChild(hr);
+        }
+
+        data.forEach((skill) => {
+          const pill = document.createElement("button");
+          pill.classList.add("pill2", "btn", "btn-secondary", "popover-test");
+          pill.setAttribute("data-bs-toggle", "popover");
+          pill.setAttribute("data-bs-placement", "top");
+          pill.setAttribute("title", skill.name);
+          pill.setAttribute("data-bs-content", skill.description);
+          pill.innerText = skill.name;
+
+          skillBatchContainer.appendChild(pill);
+        });
+
+        skillLibraryHist.appendChild(skillBatchContainer);
+        const skillBatchClone = skillBatchContainer.cloneNode(true);
+        skillLibrary.appendChild(skillBatchClone);
+
+        // Initialize Bootstrap popovers
+        $('[data-bs-toggle="popover"]').popover({
+          trigger: "click",
+          container: "body",
+        });
+        $(document).click(function (e) {
+          if (
+            $(".popover").has(e.target).length === 0 &&
+            !$(e.target).is('[data-bs-toggle="popover"]')
+          ) {
+            $('[data-bs-toggle="popover"]').popover("hide");
+          }
+        });
       });
+
+      // Listen for game status updates
+      socket.on("game_status_update", function (data) {
+        //const gameStatusString = `${data.datetime} \t ${data.energy} \t ${data.weather} \t ${data.dialog} \t ${data.other}`;
+        document.getElementById("game-status").innerText = data;
       });
 
       // Listen for screenshot updates
       socket.on("screenshot_update", function (data) {
-      document.getElementById("screenshot").src = data.url;
-      document.getElementById("screenshot-link").href = data.url;
+        document.getElementById("screenshot").src = data.url;
       });
 
       // JavaScript for Memory Logs
@@ -305,48 +524,15 @@
 
       // Define the log format
       function formatLog(log) {
-        return `
-          ${log.timestamp} - CPU: ${log.cpu_usage}%, Memory: ${log.memory_usage}% -
-          ${log.logger_name} - ${log.level} - ${log.message}
-        `;
+        return `${log.timestamp} - CPU: ${log.cpu_usage}%, Memory: ${log.memory_usage}% - ${log.logger_name} - ${log.level} - ${log.message}`;
       }
-
-      // Render existing logs when the page loads
-      const existingLogs = {{ logs | tojson | safe }};
-      existingLogs.forEach(log => {
-        logsElement.innerHTML += formatLog(log) + "<br>";
-      });
 
       // Listen for new log updates
       socket.on("log_update", function (log) {
         logsElement.innerHTML += formatLog(log) + "<br>";
       });
-
-      // Listen for stage updates
-      socket.on("stage_update", function (stage) {
-        // Reset all stage boxes
-        document.querySelectorAll(".stage-box").forEach(box => {
-          box.classList.remove("active");
-        });
-
-        // Activate the current stage box
-        if (stage) {
-          document.getElementById(stage).classList.add("active");
-        }
-      });
-
-      // Button event listeners
-      document.getElementById("play-button").addEventListener("click", () => {
-        socket.emit("control", "play");
-      });
-
-      document.getElementById("pause-button").addEventListener("click", () => {
-        socket.emit("control", "pause");
-      });
-
-      document.getElementById("stop-button").addEventListener("click", () => {
-        socket.emit("control", "stop");
-      });
     </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
