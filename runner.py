@@ -4,6 +4,7 @@ import importlib
 from cradle.config import Config
 from cradle.gameio import GameManager
 from cradle.log import Logger
+from cradle.monitor import set_verbose
 
 config = Config()
 logger = Logger()
@@ -31,13 +32,14 @@ def get_args_parser():
     parser.add_argument("--llmProviderConfig", type=str, default="./conf/openai_config.json", help="The path to the LLM provider config file")
     parser.add_argument("--embedProviderConfig", type=str, default="./conf/openai_config.json", help="The path to the embedding model provider config file")
     parser.add_argument("--envConfig", type=str, default="./conf/env_config_outlook.json", help="The path to the environment config file")
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose mode (Cradle logs will show on Cradle Monitor)")
     return parser
 
 
 if __name__ == '__main__':
     parser = get_args_parser()
     args = parser.parse_args()
-
+    set_verbose(args.verbose)
     config.load_env_config(args.envConfig)
     config.set_fixed_seed()
 

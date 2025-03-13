@@ -8,6 +8,7 @@ app = Flask(__name__)
 socketio = SocketIO(app)
 #logs = []
 cradle_status = "Ready"
+verbose = False
 STAGES = ["1 Information Gathering", "2 Self Reflection", "3 Task Inference", "4 Skill Curation", "5 Action Planning"]
 
 
@@ -25,8 +26,10 @@ def index():
 # Logs
 def add_log(log_data):
     """Add a log to the logs array and send it to all connected clients."""
-    #logs.append(log_data)
-    socketio.emit('log_update', log_data)
+    global verbose
+    if verbose: 
+        #logs.append(log_data)
+        socketio.emit('log_update', log_data)
 
 # Control Buttons
 @socketio.on("control")
@@ -53,6 +56,10 @@ def set_status(new_status):
     cradle_status = new_status
     socketio.emit("status_update", cradle_status)
 
+def set_verbose(v):
+    global verbose
+    verbose = v
+
 # Cradle Stage Pills
 def send_stage_update(iter,stage_index):
     """Emit the current stage index to all connected clients."""
@@ -73,7 +80,7 @@ def send_generic_update(id_,message):
         case 'subtask_description':
             socketio.emit("subtask_update", message)
         case 'game_status':
-            # this refers to the datetime + energy + weather + dialog + other
+            # this refers to the date_time + energy + weather + dialog + other; note message here is a dictionary with the 5 keys mentioned
             socketio.emit("game_status_update", message)
         case 'action':
             socketio.emit("action_update", f"Last Action: {message}")
@@ -98,7 +105,7 @@ def send_exec_info(exec_info):
 
 # Toolbar List
 def send_toolbar(toolbar_info):
-    """Send toolbar_info with toolbar (list) and selected_position (int) to the web UI"""
+    """Send toolbar_info with toolbar_dict_list (list) and selected_position (int) to the web UI"""
     socketio.emit("toolbar_update", toolbar_info)
 
 # Image

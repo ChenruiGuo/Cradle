@@ -13,9 +13,35 @@ from cradle.log import Logger
 from cradle.memory.base import BaseMemory, Image
 from cradle.utils.json_utils import load_json, save_json
 from cradle.utils.singleton import Singleton
+from cradle.monitor import send_generic_update, send_skill_library, send_exec_info, send_toolbar,send_image
+
 
 config = Config()
 logger = Logger()
+
+# Helper function to check for cradlemonitor updates
+def update_monitor(info):
+    try:    
+        if 'task_description' in info:
+            send_generic_update('task_description',info['task_description'])
+        if 'subtask_description' in info and info['subtask_description']!="":
+            send_generic_update('subtask_description',info['subtask_description'])
+        if 'summarization' in info and info['summarization']!="":
+            send_generic_update('summarization',info['summarization'])
+        if 'skill_library' in info:
+            send_skill_library(info['skill_library'])
+        if 'exec_info' in info and "executed_skills" in info['exec_info']:
+            send_exec_info(info['exec_info'])
+        if 'action' in info:
+            send_generic_update('action',info['action'])
+        if 'augmented_image' in info:
+            send_image(info['augmented_image'])
+        if 'toolbar_dict_list' in info:
+            send_toolbar({k: info[k] for k in ["toolbar_dict_list", "selected_position"]})
+        if 'date_time' in info:
+            send_generic_update('game_status',{k: info[k] for k in ["date_time","energy","weather","dialog","other"]})
+    except Exception as e:
+        logger.error(f"Error updating Cradle Monitor with memory: {e}. Operation skipped.")
 
 
 class LocalMemory(BaseMemory, metaclass=Singleton):
@@ -64,23 +90,16 @@ class LocalMemory(BaseMemory, metaclass=Singleton):
         key: str,
         info: Any,
     ) -> None:
-
         """Add recent info (skill/image/reasoning) to memory."""
-        if key not in self.recent_history:
-            self.recent_history[key] = []
-
-        self.recent_history[key].append(info)
-
-        if len(self.recent_history[key]) > self.max_recent_steps:
-            self.recent_history[key].pop(0)
-
+        information = {key: info}
+        self.add_recent_history(information)
 
     def add_recent_history(
         self,
         information
     ) -> None:
-
         """Add recent info to memory."""
+        update_monitor(information)
         for key, value in information.items():
             if key not in self.recent_history:
                 self.recent_history[key] = []
@@ -113,6 +132,7 @@ class LocalMemory(BaseMemory, metaclass=Singleton):
 
 
     def add_summarization(self, summary: str) -> None:
+        update_monitor({constants.SUMMARIZATION_MEM_BUCKET:summary})
         self.recent_history[constants.SUMMARIZATION_MEM_BUCKET] = [summary]
 
 
@@ -121,9 +141,12 @@ class LocalMemory(BaseMemory, metaclass=Singleton):
 
 
     def add_task_guidance(self, task_description: str, long_horizon: bool) -> None:
+        #update_monitor({constants.LAST_TASK_GUIDANCE:task_description})
+        #update_monitor({constants.LAST_TASK_DURATION:self.task_duration})
         self.recent_history[constants.LAST_TASK_GUIDANCE] = task_description
         self.recent_history[constants.LAST_TASK_DURATION] = self.task_duration
         if long_horizon:
+            #update_monitor({'long_horizon_task':task_description})
             self.recent_history['long_horizon_task'] = task_description
 
 

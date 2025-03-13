@@ -496,7 +496,7 @@
 
       // Listen for toolbar list updates
       socket.on("toolbar_update", function (data) {
-        const toolbarList = data.toolbar;
+        const toolbarList = data.toolbar_dict_list;
         const selectedPosition = data.selected_position;
         const toolbarContainer = document.getElementById("toolbar-list");
         const toolbarContainerHist = document.getElementById(
