@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 import threading
+import base64
 
 # Initialize Flask app and Socket.IO and cradlemonitor
 app = Flask(__name__)
@@ -63,7 +64,7 @@ def send_chat_message(sender, message):
     """Send a chat message to the web UI."""
     socketio.emit("chat_message", {"sender": sender, "message": message})
 
-# Generic Cradle Updates
+# Generic Cradle String Message Updates
 def send_generic_update(id_,message):
     """Send generic cradle update to the web UI."""
     match id_:
@@ -72,7 +73,13 @@ def send_generic_update(id_,message):
         case 'subtask_description':
             socketio.emit("subtask_update", message)
         case 'game_status':
+            # this refers to the datetime + energy + weather + dialog + other
             socketio.emit("game_status_update", message)
+        case 'action':
+            socketio.emit("action_update", f"Last Action: {message}")
+        case 'summarization':
+            socketio.emit("summary_update", message)
+
     
 # Skill Library Updates
 def send_skill_library(skills):
@@ -86,20 +93,23 @@ def send_skill_library(skills):
 # Execution Info
 def send_exec_info(exec_info):
     """Process exec info object and send to the web UI"""
-
-    socketio.emit()
+    error_message = "Skill Action Executed Successfully" if not exec_info["errors"] else f"Execution Error Occurred: {exec_info['errors_info']}"
+    socketio.emit("execution_info_update", error_message)
 
 # Toolbar List
-def send_toolbar(toolbar_dict_list, id_):
-    """Process toolbar dict list and selected position and send to the web UI"""
-
-    socketio.emit()
+def send_toolbar(toolbar_info):
+    """Send toolbar_info with toolbar (list) and selected_position (int) to the web UI"""
+    socketio.emit("toolbar_update", toolbar_info)
 
 # Image
-def send_image(image):
+def send_image(addr):
     """Process augmented screenshot image and send to the web UI"""
-
-    socketio.emit("screenshot_update",)
+    try:
+        with open(addr.replace("\\", "/"), "rb") as image_file:
+            base64_image = base64.b64encode(image_file.read()).decode("utf-8")
+            socketio.emit("screenshot_update", {"image": f"data:image/png;base64,{base64_image}"})
+    except Exception as e:
+        print(f"Error reading screenshot: {e}")
 
 def start_web_ui():
     """Function to start the Flask + Socket.IO server."""

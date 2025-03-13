@@ -109,26 +109,34 @@
         border-radius: 5px;
         background-color: #f9f9f9;
         padding: 10px;
-        min-height: 100px;
-        max-height: 140px;
+        min-height: 30px;
+        max-height: 180px;
         overflow-y: auto;
-        margin-bottom: 15px;
-        font-size: 14px;
+        margin-bottom: 20px;
+        font-size: 15px;
+        line-height: 1.2;
       }
       .log-section p:last-child {
         margin-bottom: 5px;
       }
-      /* Task and Subtask Containers */
-      #task-container {
-        border: 1px solid #ccc;
-        background-color: #f9f9f9;
-        padding: 10px;
-        border-radius: 5px;
-        margin-bottom: 15px;
-        line-height: 1.2;
+      /* Toolbar Containers */
+      #toolbar-list,
+      #history-toolbar-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        padding: 5px;
       }
-      #task-container p:last-child {
-        margin-bottom: 5px;
+      .toolbar-btn {
+        background-color: #e8e8e8;
+        padding: 4px 12px;
+        font-size: 12px;
+        border-radius: 5px;
+      }
+      .selected-toolbar {
+        background-color: #ffcc00;
+        border: 2px solid #ffa500;
+        font-weight: bold;
       }
       /* Skill Library Containers */
       #skill-library,
@@ -147,7 +155,7 @@
         width: 100%;
         border-bottom: 1px solid #d1d1d1;
       }
-      .skill-batch {
+      .batch {
         display: flex;
         flex-wrap: wrap;
         gap: 5px;
@@ -167,13 +175,15 @@
         background-color: #f0f0f0;
       }
       .screenshot-container img {
+        display: block;
         max-width: 100%;
-        height: auto;
+        max-height: 500px;
         border: 1px solid #ccc;
+        margin-bottom: 25px;
+        border-radius: 5px;
       }
-      /* Page 2 History Containers */
+      /* Page 3 History Containers */
       #memory-logs .log-section {
-        height: 140px;
         font-size: 12px;
         line-height: 1.2;
         border-radius: 3px;
@@ -232,48 +242,49 @@
           class="nav-link active"
           href="#"
           onclick="showPage('live-logs', this)"
-          >Live Logs</a
-        >
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#" onclick="showPage('memory-logs', this)"
-          >Memory Logs</a
+          >Cradle Live</a
         >
       </li>
       <li class="nav-item">
         <a class="nav-link" href="#" onclick="showPage('custom-page', this)"
-          >Custom Page</a
+          >Stardew Live</a
+        >
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" onclick="showPage('memory-logs', this)"
+          >Log History</a
         >
       </li>
     </ul>
-    <!-- Page Content -->
+    <!-- Page 1 -->
     <div id="live-logs" class="page-content">
       <div class="container-fluid">
         <div class="row">
           <!-- Left Section: Task, Subtask, Skills, Execution Info -->
           <div class="col-md-6 d-flex flex-column p-3">
             <h5>Task & Subtask</h5>
-            <div id="task-container">
+            <div class="log-section">
               <p>
-                <strong
-                  ><span id="task-description"
-                    >Awaiting task description data...</span
-                  ></strong
-                >
+                <strong><span id="task-description"></span></strong>
               </p>
               <p>
-                <em
-                  ><span id="subtask-description"
-                    >Awaiting subtask description data...</span
-                  ></em
-                >
+                <em><span id="subtask-description"></span></em>
               </p>
+            </div>
+            <h5>Summarization</h5>
+            <div class="log-section">
+              <p id="summary"></p>
             </div>
             <h5>Skill Library</h5>
             <div id="skill-library" class="log-section"></div>
             <h5>Execution Info</h5>
-            <div class="log-section">
-              <p id="execution-info">Awaiting data...</p>
+            <div id="execution-info-container" class="log-section">
+              <p>
+                <strong><span id="execution-action"></span></strong>
+              </p>
+              <p>
+                <em><span id="execution-errors"></span></em>
+              </p>
             </div>
           </div>
           <!-- Right Section: GPT Reasoning -->
@@ -282,21 +293,15 @@
             <div id="chat-box" class="chat-box"></div>
           </div>
         </div>
-        <!-- Bottom Section -->
-        <div class="row p-3">
-          <!-- Toolbar & Selected Position -->
-          <div class="col-md-4">
-            <h5>Toolbar List</h5>
-            <div class="log-section">
-              <ul id="toolbar-list"></ul>
-            </div>
-          </div>
-          <!-- Game Environment Info -->
-          <div id="game-status" class="text-center"></div>
-          <!-- Screenshot -->
-          <div class="col-md-4 text-center">
+      </div>
+    </div>
+    <!-- Page 2 -->
+    <div id="custom-page" class="page-content" style="display: none">
+      <div class="container-fluid p-3">
+        <div class="row">
+          <div class="col-md-6">
+            <h5>Screenshot</h5>
             <div class="screenshot-container">
-              <h5>Screenshot</h5>
               <img
                 id="screenshot"
                 src=""
@@ -305,10 +310,18 @@
               />
             </div>
           </div>
+          <div class="col-md-6">
+            <h5>Game Status</h5>
+            <div id="game-status" class="log-section"></div>
+            <h5>Toolbar List</h5>
+            <div id="inventory-list" class="inventory-container"></div>
+            <div id="toolbar-list" class="log-section"></div>
+          </div>
         </div>
       </div>
     </div>
-    <div id="memory-logs" class="page-content">
+    <!-- Page 3 -->
+    <div id="memory-logs" class="page-content" style="display: none">
       <div class="container-fluid">
         <div class="row">
           <!-- Left Section: Historical Data -->
@@ -323,34 +336,28 @@
             </div>
             <h5>Summarization History</h5>
             <div class="log-section">
-              <p id="history-summary">Awaiting data...</p>
+              <p id="history-summary">===</p>
             </div>
             <h5>Execution Info History</h5>
             <div class="log-section">
-              <p id="history-exec-info">Awaiting data...</p>
+              <p id="history-exec-info">===</p>
             </div>
             <h5>Skill Library History</h5>
             <div id="history-skill-library" class="log-section"></div>
-            <h5>Toolbar List & Selected Position History</h5>
-            <div class="log-section">
-              <ul id="history-toolbar-list"></ul>
-            </div>
-            <h5>Game Status History</h5>
-            <div class="log-section">
-              <p id="history-game-status">Awaiting data...</p>
-            </div>
           </div>
           <!-- Right Section: Cradle Logs -->
           <div class="col-md-6 p-3">
+            <h5>Toolbar List & Selected Position History</h5>
+            <div id="history-toolbar-list" class="log-section"></div>
+            <h5>Game Status History</h5>
+            <div class="log-section">
+              <p id="history-game-status">===</p>
+            </div>
             <h5>Cradle Logs</h5>
             <div id="logs" class="logs-section"></div>
           </div>
         </div>
       </div>
-    </div>
-    <div id="custom-page" class="page-content" style="display: none">
-      <h5>Custom Page</h5>
-      <p>Custom content goes here...</p>
     </div>
     <script>
       // JavaScript for Page Switching
@@ -445,20 +452,86 @@
         }
       });
 
+      // Listen for summary description updates
+      socket.on("summary_update", function (data) {
+        document.getElementById("summary").textContent = data;
+        let historyContainer = document.getElementById("history-summary");
+        if (historyContainer.textContent.trim() === "===") {
+          historyContainer.innerHTML = `<p>${data}</p>`;
+        } else {
+          let newParagraph = document.createElement("p");
+          let hr = document.createElement("hr");
+          newParagraph.textContent = data;
+          historyContainer.appendChild(hr);
+          historyContainer.appendChild(newParagraph);
+        }
+      });
+
       // Listen for action updates
       socket.on("action_update", function (data) {
-        document.getElementById("action").innerText = data;
+        document.getElementById("execution-action").textContent = data;
+        document.getElementById("execution-errors").textContent =
+          "In Execution";
+        let historyExecContainer = document.getElementById("history-exec-info");
+        if (historyExecContainer.textContent.trim() === "===") {
+          historyExecContainer.innerHTML = `<p><strong>${data}</strong></p>`;
+        } else {
+          // Create new elements for the action update
+          let newParagraph = document.createElement("p");
+          let hr = document.createElement("hr");
+          newParagraph.innerHTML = `<strong>${data}</strong>`;
+          historyExecContainer.appendChild(hr);
+          historyExecContainer.appendChild(newParagraph);
+        }
+      });
+
+      // Listen for execution info updates
+      socket.on("execution_info_update", function (data) {
+        document.getElementById("execution-errors").textContent = data;
+        let historyExecContainer = document.getElementById("history-exec-info");
+        let newParagraph = document.createElement("p");
+        newParagraph.innerHTML = `<em>${data}</em>`;
+        historyExecContainer.appendChild(newParagraph);
       });
 
       // Listen for toolbar list updates
       socket.on("toolbar_update", function (data) {
-        const toolbarList = document.getElementById("toolbar-list");
-        toolbarList.innerHTML = ""; // Clear existing items
-        data.forEach((item) => {
-          const li = document.createElement("li");
-          li.innerText = item;
-          toolbarList.appendChild(li);
+        const toolbarList = data.toolbar;
+        const selectedPosition = data.selected_position;
+        const toolbarContainer = document.getElementById("toolbar-list");
+        const toolbarContainerHist = document.getElementById(
+          "history-toolbar-list"
+        );
+        toolbarContainer.innerHTML = "";
+        let toolbarBatch = document.createElement("div");
+        toolbarBatch.classList.add("batch");
+        if (toolbarContainerHist.children.length > 0) {
+          let hr = document.createElement("hr");
+          hr.classList.add("history-divider");
+          toolbarContainerHist.appendChild(hr);
+        }
+        toolbarList.forEach((item) => {
+          let formattedName = item.name
+            .replace(/_/g, " ")
+            .split(" ")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+          let number = item.number;
+          if (item.name.toLowerCase() === "blank") {
+            formattedName = "-";
+            number = "-";
+          }
+          const button = document.createElement("button");
+          button.classList.add("toolbar-btn", "btn", "btn-light");
+          button.innerText = `${item.position}. ${number} ${formattedName}`;
+          if (item.position === selectedPosition) {
+            button.classList.add("selected-toolbar");
+          }
+          toolbarBatch.appendChild(button);
         });
+        toolbarContainer.appendChild(toolbarBatch);
+        const toolbarBatchClone = toolbarBatch.cloneNode(true);
+        toolbarContainerHist.appendChild(toolbarBatchClone);
       });
 
       // Listen for skill library updates
@@ -470,13 +543,12 @@
         );
         skillLibrary.innerHTML = "";
         let skillBatchContainer = document.createElement("div");
-        skillBatchContainer.classList.add("skill-batch");
+        skillBatchContainer.classList.add("batch");
         if (skillLibraryHist.children.length > 0) {
           let hr = document.createElement("hr");
           hr.classList.add("history-divider");
           skillLibraryHist.appendChild(hr);
         }
-
         data.forEach((skill) => {
           const pill = document.createElement("button");
           pill.classList.add("pill2", "btn", "btn-secondary", "popover-test");
@@ -485,14 +557,11 @@
           pill.setAttribute("title", skill.name);
           pill.setAttribute("data-bs-content", skill.description);
           pill.innerText = skill.name;
-
           skillBatchContainer.appendChild(pill);
         });
-
         skillLibraryHist.appendChild(skillBatchContainer);
         const skillBatchClone = skillBatchContainer.cloneNode(true);
         skillLibrary.appendChild(skillBatchClone);
-
         // Initialize Bootstrap popovers
         $('[data-bs-toggle="popover"]').popover({
           trigger: "click",
@@ -510,13 +579,34 @@
 
       // Listen for game status updates
       socket.on("game_status_update", function (data) {
-        //const gameStatusString = `${data.datetime} \t ${data.energy} \t ${data.weather} \t ${data.dialog} \t ${data.other}`;
-        document.getElementById("game-status").innerText = data;
+        let formattedStatus = `
+      <strong>Date_Time:</strong> ${data.date_time} <br>
+      <strong>Energy:</strong> ${data.energy} <br>
+      <strong>Weather:</strong> ${data.weather} <br>
+      <strong>Dialog:</strong> ${data.dialog} <br>
+      <strong>Other:</strong> ${data.other}
+      `;
+        document.getElementById("game-status").innerHTML = formattedStatus;
+        const historyGameStatusContainer = document.getElementById(
+          "history-game-status"
+        );
+        if (historyGameStatusContainer.textContent.trim() === "===") {
+          historyGameStatusContainer.innerHTML = formattedStatus;
+        } else {
+          let newEntry = document.createElement("div");
+          newEntry.classList.add("history-game-status-entry");
+          newEntry.innerHTML = formattedStatus;
+          let hr = document.createElement("hr");
+          historyGameStatusContainer.appendChild(hr);
+          historyGameStatusContainer.appendChild(newEntry);
+        }
       });
 
       // Listen for screenshot updates
       socket.on("screenshot_update", function (data) {
-        document.getElementById("screenshot").src = data.url;
+        const screenshotElement = document.getElementById("screenshot");
+        screenshotElement.src = data.image;
+        screenshotElement.style.display = "block";
       });
 
       // JavaScript for Memory Logs
