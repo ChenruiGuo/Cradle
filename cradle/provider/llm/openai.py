@@ -526,7 +526,7 @@ class OpenAIProvider(LLMProvider, EmbeddingProvider):
 
         paragraphs = re.findall(pattern, template_str)
 
-        filtered_paragraphs = [p for p in paragraphs if p.strip() != '']
+        filtered_paragraphs = [p.strip() for p in paragraphs if p.strip() != '']
 
         system_content = filtered_paragraphs[0]  # the system content defaults to the first paragraph of the template
         system_message = {
@@ -601,18 +601,19 @@ class OpenAIProvider(LLMProvider, EmbeddingProvider):
         if paragraph_input is None or paragraph_input == "" or paragraph_input == []:
             image_introduction_messages = []
         else:
-            paragraph_content_pre = image_introduction_paragraph.replace(constants.IMAGES_INPUT_TAG, "")
-            message = {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": f"{paragraph_content_pre}"
-                    }
-                ]
-            }
+            if image_introduction_paragraph.strip()!=constants.IMAGES_INPUT_TAG:
+                paragraph_content_pre = image_introduction_paragraph.replace(constants.IMAGES_INPUT_TAG, "")
+                message = {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": f"{paragraph_content_pre}"
+                        }
+                    ]
+                }
 
-            image_introduction_messages.append(message)
+                image_introduction_messages.append(message)
 
             for item in paragraph_input:
                 introduction = item.get(constants.IMAGE_INTRO_TAG_NAME, None)
