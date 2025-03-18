@@ -6,9 +6,7 @@ import base64
 # Initialize Flask app and Socket.IO and cradlemonitor
 app = Flask(__name__)
 socketio = SocketIO(app)
-#logs = []
 cradle_status = "Ready"
-verbose = False
 STAGES = ["1 Information Gathering", "2 Self Reflection", "3 Task Inference", "4 Skill Curation", "5 Action Planning"]
 
 
@@ -16,20 +14,10 @@ STAGES = ["1 Information Gathering", "2 Self Reflection", "3 Task Inference", "4
 def index():
     return render_template('index.html', status=cradle_status)
 
-# For refreshes to the web ui
-#@socketio.on('connect')
-#def handle_connect():
-#    # Send all existing logs to the new client
-#    for log in logs:
-#        socketio.emit('log_update', log)
-
 # Logs
 def add_log(log_data):
     """Add a log to the logs array and send it to all connected clients."""
-    global verbose
-    if verbose: 
-        #logs.append(log_data)
-        socketio.emit('log_update', log_data)
+    socketio.emit('log_update', log_data)
 
 # Control Buttons
 @socketio.on("control")
@@ -55,10 +43,6 @@ def set_status(new_status):
     global cradle_status
     cradle_status = new_status
     socketio.emit("status_update", cradle_status)
-
-def set_verbose(v):
-    global verbose
-    verbose = v
 
 # Cradle Stage Pills
 def send_stage_update(iter,stage_index):

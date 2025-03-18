@@ -1,6 +1,7 @@
+import argparse
 import time
 import threading
-from cradle.log import Logger
+from cradle.log import Logger, set_verbose
 from cradle.monitor import start_web_ui, get_status, send_stage_update, send_chat_message, send_generic_update, send_skill_library, send_exec_info, send_toolbar,send_image
 
 logger = Logger()
@@ -204,7 +205,18 @@ def run_program():
         if not check_status():
             break
 
+
+def get_args_parser():
+
+    parser = argparse.ArgumentParser("Cradle Agent Runner")
+    parser.add_argument("--verbose", type=int, choices=[1, 2, 3, 4], default=1, help="Set the verbose level for cradle monitor: 1=ERROR, 2=WARNING, 3=INFO, 4=DEBUG")
+    return parser
+
 if __name__ == '__main__':
+    parser = get_args_parser()
+    args = parser.parse_args()
+    set_verbose(args.verbose)
+    
     # Start the web UI in a separate thread
     web_ui_thread = threading.Thread(target=start_web_ui, daemon=True)
     web_ui_thread.start()

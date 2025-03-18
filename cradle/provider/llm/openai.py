@@ -47,6 +47,23 @@ PROVIDER_SETTING_API_VERSION = "api_version" # Azure-speficic setting
 PROVIDER_SETTING_DEPLOYMENT_MAP = "models"   # Azure-speficic setting
 
 
+def extract_and_send_message(messages):
+    m = ["===\n"]
+    for message in messages:
+        for content in message.get("content", []):
+            if content.get("type") == "text":
+                n = content.get("text", "").strip()
+                if n:
+                    m.append(n)
+                    m.append("\n===\n")
+            elif content.get("type") == "image_url":
+                m.append("**Image attachment included**")
+                m.append("\n===\n")
+    final_message = "".join(m).strip()
+    if final_message:
+        send_chat_message("Cradle", f"{final_message}\n")
+
+
 class OpenAIProvider(LLMProvider, EmbeddingProvider):
     """A class that wraps a given model"""
 
@@ -318,6 +335,8 @@ class OpenAIProvider(LLMProvider, EmbeddingProvider):
         ) -> Tuple[str, Dict[str, int]]:
 
             """Send a request to the OpenAI API."""
+            extract_and_send_message(messages)
+
             if self.provider_cfg[PROVIDER_SETTING_IS_AZURE]:
                 response = self.client.chat.completions.create(model=model,
                 messages=messages,
@@ -393,6 +412,8 @@ class OpenAIProvider(LLMProvider, EmbeddingProvider):
         ) -> Tuple[str, Dict[str, int]]:
 
             """Send a request to the OpenAI API."""
+            extract_and_send_message(messages)
+
             if self.provider_cfg[PROVIDER_SETTING_IS_AZURE]:
                 response = await asyncio.to_thread(
                     self.client.chat.completions.create,

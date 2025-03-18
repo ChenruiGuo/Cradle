@@ -9,8 +9,7 @@ from cradle.monitor.cradlemonitor import (
     send_skill_library,
     send_exec_info,
     send_toolbar,
-    send_image,
-    set_verbose
+    send_image
 )
 
 __all__ = [
@@ -24,6 +23,5 @@ __all__ = [
     "send_skill_library",
     "send_exec_info",
     "send_toolbar",
-    "send_image",
-    "set_verbose"
+    "send_image"
 ]

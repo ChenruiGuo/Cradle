@@ -12,6 +12,13 @@ from cradle.monitor import add_log
 
 colours_on(autoreset=True)
 
+# Verbose level for cradle monitor: 1=ERROR, 2=WARNING, 3=INFO, 4=DEBUG
+cm_verbose = 2
+
+def set_verbose(v):
+    global cm_verbose
+    cm_verbose = v
+
 
 class CPUMemFormatter(logging.Formatter):
 
@@ -53,7 +60,6 @@ class CPUMemColorFormatter(logging.Formatter):
 class Logger(metaclass=Singleton):
 
     log_file = 'cradle.log'
-
     log_dir = './logs'
     work_dir = None
 
@@ -71,9 +77,6 @@ class Logger(metaclass=Singleton):
 
 
     def _configure_root_logger(self):
-        
-        # to declutter the logs by removing prompts sent to openai
-        #logging.getLogger("openai._base_client").setLevel(logging.WARNING)
 
         # format = f'%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         format = '%(asctime)s - CPU: %(cpu_usage)s%%, Memory: %(memory_usage)s%% - %(name)s - %(levelname)s - %(message)s'
@@ -105,7 +108,7 @@ class Logger(metaclass=Singleton):
         self.logger = logging.getLogger("UAC Logger")
 
         if len(handlers) == 2:
-            self.logger.warn('Work directory not set. Logging to console only???')
+            self.warn('Work directory not set. Logging to console only???')
 
 
     def _log(
@@ -123,23 +126,30 @@ class Logger(metaclass=Singleton):
         self.logger.log(level, message, extra={"title": title, "color": title_color})
 
         # Send log to web UI
-        log_data = {
-            "timestamp": logging.Formatter().formatTime(self.logger.makeRecord(
-                name=self.logger.name,
-                level=level,
-                fn="",
-                lno=0,
-                msg=message,
-                args=None,
-                exc_info=None
-            )),
-            "cpu_usage": psutil.cpu_percent(interval=None),
-            "memory_usage": psutil.virtual_memory().percent,
-            "logger_name": self.logger.name,
-            "level": logging.getLevelName(level),
-            "message": message
+        verbose_map = {
+            1: logging.ERROR,
+            2: logging.WARNING,
+            3: logging.INFO,
+            4: logging.DEBUG
         }
-        add_log(log_data)
+        if level >= verbose_map.get(cm_verbose):
+            log_data = {
+                "timestamp": logging.Formatter().formatTime(self.logger.makeRecord(
+                    name=self.logger.name,
+                    level=level,
+                    fn="",
+                    lno=0,
+                    msg=message,
+                    args=None,
+                    exc_info=None
+                )),
+                "cpu_usage": psutil.cpu_percent(interval=None), 
+                "memory_usage": psutil.virtual_memory().percent,
+                "logger_name": self.logger.name,
+                "level": logging.getLevelName(level),
+                "message": message
+            }
+            add_log(log_data)
 
     def critical(
             self,
@@ -182,7 +192,7 @@ class Logger(metaclass=Singleton):
             title_color=Fore.YELLOW,
         ):
 
-        self._log(title, title_color, message, logging.WARN)
+        self._log(title, title_color, message, logging.WARNING)
 
 
     def error_ex(self, exception: Exception):
