@@ -9,7 +9,7 @@ from .llm.restful_claude import RestfulClaudeProvider
 
 from .circle_detector import CircleDetectProvider
 from .sam_provider import SamProvider
-from .object_detect.gd_provider import GdProvider
+#from .object_detect.gd_provider import GdProvider
 
 from .video.video_ocr_extractor import VideoOCRExtractorProvider
 from .video.video_recorder import VideoRecordProvider
@@ -70,7 +70,7 @@ __all__ = [
     "RestfulClaudeProvider",
 
     # Object detection provider
-    "GdProvider",
+    #"GdProvider",
 
     # Video provider
     "VideoOCRExtractorProvider",
