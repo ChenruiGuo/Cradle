@@ -10,7 +10,7 @@ from cradle.planner.base import BasePlanner
 from cradle.utils.check import check_planner_params
 from cradle.utils.file_utils import assemble_project_path, read_resource_file
 from cradle.utils.json_utils import load_json, parse_semi_formatted_text, JsonFrameStructure
-from cradle.utils.template_matching import match_templates_images, selection_box_identifier
+from cradle.utils.template_matching import match_templates_images, selection_box_identifier, match_templates_number
 from cradle import constants
 
 config = Config()
@@ -181,6 +181,9 @@ class InformationGathering():
 
     STARDEW_ORIGINAL_ICON_LIST = [
         os.path.join("./res/stardew/icons/inventory", f) for f in os.listdir("./res/stardew/icons/inventory")
+    ]
+    STARDEW_ORIGINAL_NUMS_LIST = [
+        os.path.join("./res/stardew/icons/nums", f) for f in os.listdir("./res/stardew/icons/nums")
     ]
 
     def __init__(
@@ -455,65 +458,24 @@ class InformationGathering():
             matching_dict[key] = os.path.splitext(os.path.basename(matching_dict[key]))[0]
         return matching_dict,selected_position
 
-    async def gather_toolbar_list(self, match_dict, get_number_flag=True):
-        any_key = next(iter(match_dict.keys()))
-        video_prefix = any_key.split("/")[-2]
-        frame_paths = []
-        for path in match_dict:
-            frame_paths.append(path)
-        names = []
-        for path in match_dict:
-            names.append(match_dict[path])
-
-        frame_extractor_gathered_information = JsonFrameStructure()
-        text_input = self.toolbar_input_map
-
-        if get_number_flag:
-            # Create completions in parallel
-            logger.write(
-                f"Start gathering text information from the whole video in parallel"
-            )
-
-            await get_completion_in_parallel_tool(
-                self.llm_provider,
-                self.toolbar_input_map,
-                frame_paths,
-                names,
-                text_input,
-                self.get_toolbar_template,
-                video_prefix,
-                frame_extractor_gathered_information,
-            )
-
-            inventory_index_list = []
-            item_number_list = []
-            for key_1 in frame_extractor_gathered_information.data_structure:
-                for key_2 in frame_extractor_gathered_information.data_structure[key_1]:
-                    pattern = r"_([0-9]+)$"
-                    match = re.search(pattern, key_2)
-                    inventory_index = match.group(1)
-                    contents = frame_extractor_gathered_information.data_structure[key_1][key_2]
-                    item_number = self.extract_number(contents)
-                    inventory_index_list.append(inventory_index)
-                    item_number_list.append(item_number)
-        else:
-            # creat a item_number_list will all 1
-            item_number_list = [1] * len(names)
-            inventory_index_list = [str(i) for i in range(len(names))]
-
+    async def gather_toolbar_list(self, match_dict, base_template_file_list, get_number_flag=True):
+        '''Extract the number from a Stardew Valley toolbar slot using template matching'''
         toolbar_dict_list = []
-        for i in range(len(inventory_index_list)):
-
-            name = names[i]
-            number = item_number_list[inventory_index_list.index(str(i))]
-            position = i + 1
-
-            toolbar_dict_list.append({
-                "name": name,
-                "number": number,
-                "position": position
-            })
-
+        for path, name in match_dict.items():
+            position = path.split("/")[-1].split(".")[0]
+            if get_number_flag:
+                detected_number = match_templates_number(path, base_template_file_list)
+                number = int(detected_number) if detected_number.isdigit() else (0 if name == "blank" else 1)
+                toolbar_dict_list.append({
+                    "name": name,
+                    "number": number,
+                    "position": position
+                })
+            else:
+                toolbar_dict_list.append({
+                    "name": name,
+                    "position": position
+                })
         return toolbar_dict_list
 
     def extract_number(self, data):
@@ -534,7 +496,7 @@ class InformationGathering():
             cur_inventories_shot_paths, self.STARDEW_ORIGINAL_ICON_LIST, new_icon_template_list
         )
         toolbar_dict_list = await self.gather_toolbar_list(
-            match_dict, get_number_flag=gather_information_configurations[constants.GET_ITEM_NUMBER]
+            match_dict, self.STARDEW_ORIGINAL_NUMS_LIST, get_number_flag=gather_information_configurations[constants.GET_ITEM_NUMBER]
         )
         return toolbar_dict_list,selected_position
 

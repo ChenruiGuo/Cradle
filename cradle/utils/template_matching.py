@@ -259,3 +259,38 @@ def selection_box_identifier(image_path, red_box_region):
     red_pixels_threshold = total_edge_pixels * 0.2
 
     return red_pixels >= red_pixels_threshold
+
+
+def match_templates_number(
+    src_file: str,
+    base_template_file_list: List[str],
+    debug=False,
+) -> str:
+    """
+    Multi-scale template matching
+    :param src_file: source image file
+    :param base_template_file_list: template image files
+    :param debug: output debug log messages
+
+    :return:
+    corresponding item count for each source image in string form
+    """
+    # Load the toolbar image
+    toolbar_image = cv2.imread(src_file)
+
+    # Load all digit templates (0-9)
+    digit_templates = []
+    for digit_path in base_template_file_list:
+        digit_img = cv2.imread(digit_path)
+        digit_templates.append((digit_path.split("\\")[-1].split(".")[0], digit_img))
+
+    # Perform multi-template matching
+    detections = matchTemplates(digit_templates, toolbar_image, method=cv2.TM_CCOEFF_NORMED, maxOverlap=0.2)
+
+    # Sort detected digits by x-coordinate (left to right)
+    detections = sorted(zip(detections["BBox"], detections["Score"], detections["TemplateName"]), key=lambda x: x[0][0])
+    detected_number = ""
+    for bbox, score, digit in detections:
+        if score > 0.6:  # Confidence threshold (adjust if needed)
+            detected_number += digit
+    return detected_number
