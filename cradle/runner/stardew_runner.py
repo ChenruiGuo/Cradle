@@ -178,7 +178,7 @@ class PipelineRunner():
         success = False
         init_params = {
             "task_description": self.task_description,
-            "skill_library": self.skill_library,
+            #"skill_library": self.skill_library,
             "exec_info": {
                 "errors": False,
                 "errors_info": ""
@@ -186,7 +186,7 @@ class PipelineRunner():
             "pre_action": "",
             "pre_decision_making_reasoning": "",
             "pre_self_reflection_reasoning": "",
-            "summarization": "",
+            #"summarization": "",
             "toolbar_information": None,
             "subtask_description": "",
             "subtask_reasoning": "",

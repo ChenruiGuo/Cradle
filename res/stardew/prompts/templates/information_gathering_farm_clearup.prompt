@@ -5,6 +5,12 @@ Assume you are a helpful AI assistant integrated with 'Stardew Valley' on the PC
 Current task:
 <$task_description$>
 
+Current toolbar:
+<$toolbar_dict_list$>
+
+Selected position:
+<$selected_position$>
+
 Description: Please analyze and describe the screenshot image in a grid-by-grid format and then provide an overall image description. Pay attention to anything related to the task. The image is divided into a 3x5 grid, each cell having its own coordinates. For each grid cell, describe the contents in detail, focusing on any critical icons, or objects present in that particular segment. If there are specific features such as characters or text, mention these as well. After completing the description for one cell, proceed to the next, for example, 'In grid (1,1), [description]. In grid (1,2), [description].' and so on until the entire image is covered.
 
 Date_time: The date and time information in the game are shown on the upper-right of the screenshot, in grid (1, 5). An example of the date and time information is "Wed 10, 5:10 pm".
@@ -17,20 +23,26 @@ Dialog: If there are some dialogs shown in the screenshot, extract the text of t
 
 Other: Other information that does not belong to the above categories. If none of them applies, only output "null".
 
+Toolbar_information: Given the current toolbar and selected position information above, for each of the 12 items, state the item name, whether it is a tool or just an item, and a very short description of its use in Stardew Valley. If the slot is blank, just say Blank: Empty slot.
+Examples of outputs for common items are Axe: Tool. Used to chop woods; Hoe: Tool. Used to dig and till soil; Watering Can: Tool. Used to water crops. It can be refilled at any water source. Now it's (full/partially full/empty); Pickaxe: Tool. Used to break stones and rocks; Scythe: Tool. It can cut grass and weeds into hay, if you've built a silo;
+At the very end, according to selected position, mention the item selected. If unsure, mention "Now you are not selecting any item". Take note to only leave one \n character between item 12 and the selected item in your response.
+
 You should only respond in the format described below and not output comments or other information.
 Description:
 In grid (1,1), ...
 In grid (1,2), ...
 ...
-In grid (3,5), ... 
+In grid (3,3), ... 
 Overall, the image shows...
 Date_time:
 Date and time information
 Energy:
-The number of energy remains showing in the energy bar
+Energy information
 Weather:
 Weather information
 Dialog:
 Dialog text
 Other:
 Other information is ...
+Toolbar_information:
+The items in the toolbar are arranged from left to right in the following order.\n1. (name): (Tool/Item). (Use or short description).\n2. ... .\n3. ... ... .\n11. ... .\n12. ... .\nNow the item you selected is: (position). (item name).\n

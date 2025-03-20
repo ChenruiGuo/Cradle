@@ -210,7 +210,8 @@ class StardewInformationGatheringPreprocessProvider(BaseProvider):
         logger.write("Stardew Information Gathering Preprocess")
 
         prompts = [
-            "This is a screenshot of the current moment in the game with multiple augmentation to help you understand it better. The screenshot is organized into a grid layout with 15 segments, arranged in 3 rows and 5 columns. Each segment in the grid is uniquely identified by coordinates, which are displayed at the center of each segment in white text. The layout also features color-coded bands for orientation: a blue band on the left side and a yellow band on the right side of the screenshot."
+            #"This is a screenshot of the current moment in the game with multiple augmentation to help you understand it better. The screenshot is organized into a grid layout with 15 segments, arranged in 3 rows and 5 columns. Each segment in the grid is uniquely identified by coordinates, which are displayed at the center of each segment in white text. The layout also features color-coded bands for orientation: a blue band on the left side and a yellow band on the right side of the screenshot."
+            "This is a screenshot of the current moment in the game. The screenshot can be viewed as a 3 rows by 3 columns grid layout. Each grid is identified by (row, column), where row and column numbers go from 1 to 3."
         ]
 
         start_frame_id = self.memory.get_recent_history("start_frame_id", k=1)[0]
@@ -235,7 +236,7 @@ class StardewInformationGatheringPreprocessProvider(BaseProvider):
             cur_screenshot_path_augmented = augmented_screenshot_path
 
         cur_toolbar_shot_path = segment_toolbar(cur_screenshot_path)
-        cur_new_icon_image_shot_path, cur_new_icon_name_image_shot_path = segment_new_icon(cur_screenshot_path)
+        #cur_new_icon_image_shot_path, cur_new_icon_name_image_shot_path = segment_new_icon(cur_screenshot_path)
         cur_inventories_shot_paths = segement_inventory(r"{}".format(cur_toolbar_shot_path))
 
         image_introduction = [
@@ -261,8 +262,8 @@ class StardewInformationGatheringPreprocessProvider(BaseProvider):
             constants.IMAGES_MEM_BUCKET: cur_screenshot_path,
             constants.AUGMENTED_IMAGES_MEM_BUCKET: cur_screenshot_path_augmented,
             "cur_inventories_shot_paths": cur_inventories_shot_paths,
-            "cur_new_icon_image_shot_path": cur_new_icon_image_shot_path,
-            "cur_new_icon_name_image_shot_path": cur_new_icon_name_image_shot_path,
+            #"cur_new_icon_image_shot_path": cur_new_icon_image_shot_path,
+            #"cur_new_icon_name_image_shot_path": cur_new_icon_name_image_shot_path,
             "video_clip_path": video_clip_path,
             "gather_information_configurations": gather_information_configurations
         }
@@ -379,59 +380,10 @@ class StardewInformationGatheringPostprocessProvider(BaseProvider):
         self.memory = LocalMemory()
 
 
-    def prepare_toolbar_information(self,
-                                    tool_dict_list: List[Dict[str, Any]],
-                                    selected_position: int):
-
-        toolbar_information = "The items in the toolbar are arranged from left to right in the following order.\n"
-        selected_item = None
-
-        for item in tool_dict_list:
-
-            name = item["name"]
-            number = item["number"]
-            position = item["position"]
-
-            if name in self.base_toolbar_objects:
-                toolbar_object = self.base_toolbar_objects[name]
-                true_name = toolbar_object["name"]
-                type = toolbar_object["type"]
-                description = toolbar_object["description"]
-
-                if type == "Tool":
-                    toolbar_information += f"{position}. {true_name}: {type}. {description}\n"
-                elif type == "Blank":
-                    toolbar_information += f"{position}. {true_name}: {description}\n"
-                else:
-                    toolbar_information += f"{position}. {true_name}: {type}. {description} Quality: {number}.\n"
-
-                if selected_position is not None and selected_position == position:
-                    selected_item = true_name
-            else:
-                toolbar_object = self.base_toolbar_objects["unknown"]
-                true_name = toolbar_object["name"]
-                type = toolbar_object["type"]
-                description = toolbar_object["description"]
-                toolbar_information += f"{position}. {true_name}: {description}\n"
-
-        # selected item
-        if selected_item is not None:
-            toolbar_information += f"Now the item you selected is: {selected_position}. {selected_item}\n"
-        else:
-            toolbar_information += f"Now you are not selecting any item.\n"
-
-        return toolbar_information
-
-
     def __call__(self, response: Dict):
 
         logger.write("Stardew Information Gathering Postprocess")
-
         processed_response = deepcopy(response)
-
-        response['toolbar_information'] = self.prepare_toolbar_information(
-            response['toolbar_dict_list'],
-            response['selected_position'])
         response['image_description'] = response['description']
 
         previous_toolbar_information = None
@@ -444,7 +396,7 @@ class StardewInformationGatheringPostprocessProvider(BaseProvider):
 
         if constants.IMAGE_DESCRIPTION in response:
             if 'toolbar_information' in response:
-                previous_toolbar_information = toolbar_information
+                previous_toolbar_information = self.memory.get_recent_history("toolbar_information")[-1]
                 toolbar_information = response['toolbar_information']
             if 'selected_position' in response:
                 selected_position = response['selected_position']

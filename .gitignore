@@ -173,3 +173,4 @@ test*
 
 # Image recognition toolbar improvements (to be removed from this list when done)
 zzTesting Stuff/
+toolbar_detect.ipynb

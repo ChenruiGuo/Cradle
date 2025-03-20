@@ -219,8 +219,8 @@ class InformationGathering():
     def __call__(self, *args, input: Dict[str, Any] = None, class_=None, **kwargs) -> Dict[str, Any]:
         gather_information_configurations = input["gather_information_configurations"]
         cur_inventories_shot_paths = input["cur_inventories_shot_paths"]
-        cur_new_icon_image_shot_path = input["cur_new_icon_image_shot_path"]
-        cur_new_icon_name_image_shot_path = input["cur_new_icon_name_image_shot_path"]
+        #cur_new_icon_image_shot_path = input["cur_new_icon_image_shot_path"]
+        #cur_new_icon_name_image_shot_path = input["cur_new_icon_name_image_shot_path"]
 
         frame_extractor_gathered_information = None
         icon_replacer_gathered_information = None
@@ -335,10 +335,10 @@ class InformationGathering():
         # 1.identify new item in the toolbar
         # TODO: identify new item in the toolbar (still not complete)
         # new_icon_template_list = self.gather_information_of_new_icon(cur_new_icon_image_shot_path,cur_new_icon_name_image_shot_path)
-        new_icon_template_list = []
+        #new_icon_template_list = []
 
-        # run gather toolbar info and llm_description in parallel
-        results = asyncio.run(self.execute_parallel(cur_inventories_shot_paths, gather_information_configurations, input))
+        # run gather toolbar info and llm_description not in parallel (toolbar first, then send toolbar info to gpt for summarising)
+        results = self.execute_notinparallel(cur_inventories_shot_paths, gather_information_configurations, input)
         toolbar_dict_list, selected_position, processed_response, flag = results
         llm_description_gathered_information=processed_response
 
@@ -360,7 +360,7 @@ class InformationGathering():
             processed_response['toolbar_dict_list'] = toolbar_dict_list
             processed_response['selected_position'] = selected_position
 
-            # Merge the gathered_information_JSON to the processed_response
+            # Merge the gathered_information_JSON to the processed_response (usually None)
             processed_response["gathered_information_JSON"] = frame_extractor_gathered_information
 
             if gather_information_configurations[constants.FRAME_EXTRACTOR] is True:
@@ -446,7 +446,7 @@ class InformationGathering():
 
         pass
 
-    async def template_matching_for_current_toolbar(self, sr_file_list, base_template_file_list, work_template_file_list):
+    def template_matching_for_current_toolbar(self, sr_file_list, base_template_file_list, work_template_file_list):
         matching_dict = match_templates_images(sr_file_list, base_template_file_list, work_template_file_list)
         selected_position=None
         for sr_file in sr_file_list:
@@ -458,11 +458,11 @@ class InformationGathering():
             matching_dict[key] = os.path.splitext(os.path.basename(matching_dict[key]))[0]
         return matching_dict,selected_position
 
-    async def gather_toolbar_list(self, match_dict, base_template_file_list, get_number_flag=True):
+    def gather_toolbar_list(self, match_dict, base_template_file_list, get_number_flag=True):
         '''Extract the number from a Stardew Valley toolbar slot using template matching'''
         toolbar_dict_list = []
         for path, name in match_dict.items():
-            position = path.split("/")[-1].split(".")[0]
+            position = int(path.split("/")[-1].split(".")[0])
             if get_number_flag:
                 detected_number = match_templates_number(path, base_template_file_list)
                 number = int(detected_number) if detected_number.isdigit() else (0 if name == "blank" else 1)
@@ -490,17 +490,17 @@ class InformationGathering():
                         print("Cannot convert to integer.")
                         return None
 
-    async def gather_toolbar_parallel(self, cur_inventories_shot_paths, gather_information_configurations):
+    def gather_toolbar_parallel(self, cur_inventories_shot_paths, gather_information_configurations):
         new_icon_template_list = []
-        match_dict, selected_position = await self.template_matching_for_current_toolbar(
+        match_dict, selected_position = self.template_matching_for_current_toolbar(
             cur_inventories_shot_paths, self.STARDEW_ORIGINAL_ICON_LIST, new_icon_template_list
         )
-        toolbar_dict_list = await self.gather_toolbar_list(
+        toolbar_dict_list = self.gather_toolbar_list(
             match_dict, self.STARDEW_ORIGINAL_NUMS_LIST, get_number_flag=gather_information_configurations[constants.GET_ITEM_NUMBER]
         )
         return toolbar_dict_list,selected_position
 
-    async def gather_llm_description(self, input):
+    def gather_llm_description(self, input):
         flag=True
         gather_information_configurations = input["gather_information_configurations"]
         if gather_information_configurations[constants.LLM_DESCRIPTION] is True:
@@ -538,14 +538,16 @@ class InformationGathering():
             return None,False
 
 
-    async def execute_parallel(self, cur_inventories_shot_paths, gather_information_configurations,
+    def execute_notinparallel(self, cur_inventories_shot_paths, gather_information_configurations,
                                input):
         # try:
-            task_a = self.gather_toolbar_parallel(cur_inventories_shot_paths, gather_information_configurations)
-            task_b = self.gather_llm_description(input)
-            tool_bar_results, llm_results = await asyncio.gather(task_a, task_b)
+            toolbar_dict_list,selected_position = self.gather_toolbar_parallel(cur_inventories_shot_paths, gather_information_configurations)
+            input.update({
+                "toolbar_dict_list":toolbar_dict_list,
+                "selected_position":selected_position
+            })
+            llm_results = self.gather_llm_description(input)
 
-            toolbar_dict_list, selected_position = tool_bar_results
             processed_response, flag = llm_results
             llm_description_gathered_information = processed_response
             # Handle results here or return them
@@ -905,7 +907,7 @@ class StardewPlanner(BasePlanner):
         if input is None:
             input = self.inputs["gather_information"]
 
-        image_file = input["image_introduction"][0]["path"]
+        #image_file = input["image_introduction"][0]["path"]
 
         for i in range(self.gather_information_max_steps):
             data = self.information_gathering_(input=input, class_=None)

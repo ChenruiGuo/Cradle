@@ -235,7 +235,7 @@ class StardewSelfReflectionPreprocessProvider(BaseProvider):
         pre_decision_making_reasoning = self.memory.get_recent_history("pre_decision_making_reasoning", k=1)[0]
         exec_info = self.memory.get_recent_history("exec_info", k=1)[0]
         skill_library = self.memory.get_recent_history("skill_library", k=1)[0]
-        datetime = self.memory.get_recent_history("datetime", k=1)[0]
+        date_time = self.memory.get_recent_history("date_time", k=1)[0]
         toolbar_information = self.memory.get_recent_history("toolbar_information", k=1)[0]
         previous_toolbar_information = self.memory.get_recent_history("previous_toolbar_information", k=1)[0]
         history_summary = self.memory.get_recent_history("history_summary", k=1)[0]
@@ -249,7 +249,7 @@ class StardewSelfReflectionPreprocessProvider(BaseProvider):
             "skill_library": skill_library,
             "exec_info": exec_info,
             "pre_decision_making_reasoning": pre_decision_making_reasoning,
-            "datetime": datetime,
+            "date_time": date_time,
             "toolbar_information": toolbar_information,
             "previous_toolbar_information": previous_toolbar_information,
             "history_summary": history_summary,
@@ -257,12 +257,8 @@ class StardewSelfReflectionPreprocessProvider(BaseProvider):
             "subtask_reasoning": subtask_reasoning
         }
 
-        if start_frame_id > -1:
-            action_frames = []
-            video_frames = self.video_recorder.get_frames(start_frame_id, end_frame_id)
-
-            action_frames.append(self.augment_image(video_frames[0][1]))
-            action_frames.append(self.augment_image(video_frames[-1][1]))
+        if start_frame_id > -1: #ie if not first iteration
+            action_frames = self.memory.get_recent_history("augmented_image", k=2)
 
             image_introduction = [
                 {
