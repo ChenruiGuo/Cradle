@@ -2,7 +2,7 @@ import argparse
 import time
 import threading
 from cradle.log import Logger, set_verbose
-from cradle.monitor import start_web_ui, get_status, send_stage_update, send_chat_message, send_generic_update, send_skill_library, send_exec_info, send_toolbar,send_image
+from cradle.monitor import start_web_ui, get_status, set_status, send_stage_update, send_chat_message, send_generic_update, send_skill_library, send_exec_info, send_toolbar,send_image
 
 logger = Logger()
 STAGES = ["1 Information Gathering", "2 Self Reflection", "3 Task Inference", "4 Skill Curation", "5 Action Planning"]
@@ -10,11 +10,13 @@ STAGES = ["1 Information Gathering", "2 Self Reflection", "3 Task Inference", "4
 
 def check_status():
     """Check the current status and handle pause/stop behavior."""
-    if get_status()=="Stopped":
-        print("Stopping program...")
-        return False # Add command here to terminate program
-    elif get_status()=="Paused":
+    if get_status()=="Stopping":
+        print("Program stopped...")
+        return False
+    elif get_status()=="Pausing":
+        set_status("Paused")
         print("Program paused... Waiting to resume.")
+        time.sleep(2)
         while get_status()=="Paused":  # If paused, keep checking status every 2s
             time.sleep(2)
     return get_status()=="Running"

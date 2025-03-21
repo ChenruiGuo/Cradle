@@ -191,7 +191,7 @@ class StardewTaskInferencePreprocessProvider(BaseProvider):
         logger.write(f'Stardew Task Inference Preprocess')
 
         prompts = [
-            "This screenshot is the current step of the game. The blue band represents the left side and the yellow band represents the right side."
+            "This screenshot is the current step of the game."
         ]
 
         task_description = memory.get_recent_history("task_description", k=1)[0]

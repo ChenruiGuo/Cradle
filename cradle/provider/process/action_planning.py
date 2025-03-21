@@ -185,8 +185,8 @@ class StardewActionPlanningPreprocessProvider(BaseProvider):
             "This screenshot is five steps before the current step of the game",
             "This screenshot is three steps before the current step of the game",
             "This screenshot is two steps before the current step of the game",
-            "This screenshot is the previous step of the game. The blue band represents the left side and the yellow band represents the right side.",
-            "This screenshot is the current step of the game. The blue band represents the left side and the yellow band represents the right side."
+            "This screenshot is the previous step of the game.",
+            "This screenshot is the current step of the game."
         ]
 
         pre_action = memory.get_recent_history("pre_action", k=1)[0]

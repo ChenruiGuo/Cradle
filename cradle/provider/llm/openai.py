@@ -564,7 +564,7 @@ class OpenAIProvider(LLMProvider, EmbeddingProvider):
                 placeholder_name = placeholder.replace("<$", "").replace("$>", "")
 
                 paragraph_input = params.get(placeholder_name, None)
-                if paragraph_input is None or paragraph_input == "" or paragraph_input == []:
+                if paragraph_input is None or paragraph_input == "" or paragraph_input == [] or paragraph_input == [""]:
                     continue
                 else:
                     if isinstance(paragraph_input, str):
@@ -598,7 +598,7 @@ class OpenAIProvider(LLMProvider, EmbeddingProvider):
 
         paragraph_input = params.get(constants.IMAGES_INPUT_TAG_NAME, []) # 'image_introduction'
 
-        if paragraph_input is None or paragraph_input == "" or paragraph_input == []:
+        if paragraph_input is None or paragraph_input == "" or paragraph_input == [] or paragraph_input == [""]:
             image_introduction_messages = []
         else:
             if image_introduction_paragraph.strip()!=constants.IMAGES_INPUT_TAG:
@@ -682,7 +682,7 @@ class OpenAIProvider(LLMProvider, EmbeddingProvider):
                 placeholder_name = placeholder.replace("<$", "").replace("$>", "")
 
                 paragraph_input = params.get(placeholder_name, None)
-                if paragraph_input is None or paragraph_input == "" or paragraph_input == []:
+                if paragraph_input is None or paragraph_input == "" or paragraph_input == [] or paragraph_input == [""]:
                     continue
                 else:
                     if isinstance(paragraph_input, str):

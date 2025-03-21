@@ -112,7 +112,7 @@ class Config(metaclass=Singleton):
 
         # Decision-making image count
         self.action_planning_image_num = 2
-        self.number_of_execute_skills = 1
+        self.number_of_execute_skills = 5
         self.skill_library_with_code = False
 
         # OCR local checks

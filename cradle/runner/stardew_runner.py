@@ -178,7 +178,6 @@ class PipelineRunner():
         success = False
         init_params = {
             "task_description": self.task_description,
-            #"skill_library": self.skill_library,
             "exec_info": {
                 "errors": False,
                 "errors_info": ""
@@ -186,10 +185,11 @@ class PipelineRunner():
             "pre_action": "",
             "pre_decision_making_reasoning": "",
             "pre_self_reflection_reasoning": "",
-            #"summarization": "",
             "toolbar_information": None,
             "subtask_description": "",
             "subtask_reasoning": "",
+            "human_obs_feedback": "",
+            "human_reason_feedback": ""
         }
 
         self.memory.update_info_history(init_params)
@@ -247,6 +247,9 @@ class PipelineRunner():
                 # 7.5. Action planning
                 send_stage_update(step+1,4)
                 self.run_action_planning()
+
+                # Flush human observation feedback in working memory (they should only be retained for one iteration)
+                self.memory.working_area.update({"human_obs_feedback":""})
 
                 if not self.check_status():
                     break

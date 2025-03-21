@@ -3,6 +3,7 @@ from flask_socketio import SocketIO
 import threading
 import base64
 
+
 # Initialize Flask app and Socket.IO and cradlemonitor
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -33,6 +34,26 @@ def handle_control(action):
 
     # Broadcast the updated status to all clients
     socketio.emit("status_update", cradle_status)
+
+# Human Feedback Cradle
+@socketio.on("feedback_submission")
+def handle_feedback(data):
+    observation_feedback = data.get("observation_feedback", "").strip()
+    reasoning_feedback = data.get("reasoning_feedback", "").strip()
+    from cradle.memory import LocalMemory
+    memory = LocalMemory()
+    feedback_dict = {}
+    if observation_feedback:
+        # observation feedback lives only for one iteration in mem working area, as it may get outdated in the next iteration
+        feedback_dict["human_obs_feedback"] = observation_feedback
+    if reasoning_feedback:
+        # reasoning feedback persists throughout whole gameplay, so we concat old reasoning to the new in the mem working area
+        old_reasoning_feedback = memory.get_recent_history('human_reason_feedback', k=1)[0]
+        feedback_dict["human_reason_feedback"] = f"{old_reasoning_feedback}\n{reasoning_feedback}"
+    if feedback_dict:
+        memory.update_info_history(feedback_dict)
+        #print(f"\n\nobservation_feedback: {memory.get_recent_history('human_obs_feedback', k=1)[0]}\n\n")
+        #print(f"\n\nreasoning_feedback: {memory.get_recent_history('human_reason_feedback', k=1)[0]}\n\n")
 
 # Cradle Status
 def get_status():

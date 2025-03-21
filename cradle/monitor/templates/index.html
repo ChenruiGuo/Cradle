@@ -94,6 +94,9 @@
         max-width: 70%;
         display: inline-block;
         margin: 2px 0;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        white-space: pre-wrap;
       }
       .gpt-message {
         justify-content: flex-start;
@@ -103,6 +106,9 @@
         color: black;
         font-weight: normal;
         margin: 2px 0;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        white-space: pre-wrap;
       }
       /* Game Status Containers */
       .log-section {
@@ -360,6 +366,57 @@
         </div>
       </div>
     </div>
+    <!-- Feedback Modal -->
+    <div
+      class="modal fade"
+      id="feedbackModal"
+      tabindex="-1"
+      aria-labelledby="feedbackModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="feedbackModalLabel">
+              Human Feedback for Cradle
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="feedbackForm">
+              <div class="mb-3">
+                <label for="observation-feedback" class="form-label"
+                  >Observation Feedback</label
+                >
+                <textarea
+                  class="form-control"
+                  id="observation-feedback"
+                  rows="3"
+                ></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="reasoning-feedback" class="form-label"
+                  >Reasoning Feedback</label
+                >
+                <textarea
+                  class="form-control"
+                  id="reasoning-feedback"
+                  rows="3"
+                ></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                Submit Feedback
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
     <script>
       // JavaScript for Page Switching
       function showPage(pageId, clickedTab) {
@@ -380,6 +437,10 @@
         socket.emit("control", "play");
       });
       document.getElementById("pause-button").addEventListener("click", () => {
+        var feedbackModal = new bootstrap.Modal(
+          document.getElementById("feedbackModal")
+        );
+        feedbackModal.show();
         socket.emit("control", "pause");
       });
       document.getElementById("stop-button").addEventListener("click", () => {
@@ -622,6 +683,33 @@
       socket.on("log_update", function (log) {
         logsElement.innerHTML += formatLog(log) + "<br>";
       });
+
+      // Human Feedback for Cradle
+      document
+        .getElementById("feedbackForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const observation = document
+            .getElementById("observation-feedback")
+            .value.trim();
+          const reasoning = document
+            .getElementById("reasoning-feedback")
+            .value.trim();
+
+          // Send feedback data to the backend
+          socket.emit("feedback_submission", {
+            observation_feedback: observation,
+            reasoning_feedback: reasoning,
+          });
+
+          // Close the modal after submission
+          var feedbackModal = bootstrap.Modal.getInstance(
+            document.getElementById("feedbackModal")
+          );
+          feedbackModal.hide();
+          document.getElementById("feedbackForm").reset();
+        });
     </script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

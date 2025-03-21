@@ -28,6 +28,12 @@ Self-reflection for the last executed action:
 The following is the summary of history that happened before the last screenshot:
 <$previous_summarization$>
 
+Human observation feedback. Treat this feedback as ground truth. If any previous descriptions contradict it, ignore those descriptions:
+<$human_obs_feedback$>
+
+Human reason feedback. Use this feedback as a guide for any decision-making. Follow the reasoning structure and adjust your thought process accordingly:
+<$human_reason_feedback$>
+
 History_summary: Summarize what happened in the past experience, especially the last step according to the decision-making reasoning and self-reflection reasoning for the last executed action. The summarization needs to be precise, concrete and highly related to the task and follow the rules below.
 1. Summarize the tasks from the history and the current task. What is the current progress of the task? For example, to harvest a seed, you need to water the seed for 4 days. And you have already planted the seed and watered it for two days.
 2. Record the successful actions and organize them into events day by day.

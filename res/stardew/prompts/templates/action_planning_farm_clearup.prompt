@@ -28,6 +28,12 @@ Valid action set in Python format to select the next action:
 
 <$image_introduction$>
 
+Human observation feedback. Treat this feedback as ground truth. If any previous descriptions contradict it, ignore those descriptions:
+<$human_obs_feedback$>
+
+Human reason feedback. Use this feedback as a guide for any decision-making. Follow the reasoning structure and adjust your thought process accordingly:
+<$human_reason_feedback$>
+
 Based on the above information, analyze the current situation and provide the reasoning for what you should do for the next step to complete the task. Then, you should output the exact action you want to execute in the game. You should respond to me with:
 
 Reasoning: You should think step by step and provide detailed reasoning to determine the next action executed on the current state of the task. You need to answer the following questions step by step. You MUST NOT miss question 3 and question 11:
